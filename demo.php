@@ -7,6 +7,7 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Chatblock tutorial</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,6 +19,8 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
         switch($page)
         {
             default:
+                $sample = file_get_contents('./tutorial/0-toc.txt');
+            break;
             case '1': 
                 $sample = file_get_contents('./tutorial/1-basic.txt');
             break;
@@ -66,11 +69,11 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
         // Setting
         $cui->setColon([':','：','#']);
         $cui->setNarrator(['Narrator','narrator','系统']);
-        $cui->feed($sample);
-        $cui->render();
-        // Output
         echo sprintf('<style>%s</style>', $cui->renderCss());
-        echo $cui->output();
+        $cui->feed($sample);
+        echo $cui->render();
+        // Output for other format
+        // echo $cui->output();
         ?>
         
     </body>

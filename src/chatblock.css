@@ -122,6 +122,7 @@
     background-color: #cccccc;
     padding: 0.5rem;
     white-space: break-spaces;
+    overflow: auto;
   }
   
   .chatblock .container {

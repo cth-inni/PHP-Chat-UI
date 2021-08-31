@@ -16,6 +16,9 @@
 - [x] Narrator array (default as narrator)
 - [x] stater template
 - [x] dev tutorial （with sample）
+- [x] allow easy mode use first line as main cast
+## Aug 2021
+- [] navigation link button
 
 # version 2 roadmap
 - [] global setting before render

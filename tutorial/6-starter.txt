@@ -1,4 +1,24 @@
+小编@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
+Baba@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
+小编2@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
+---
+Baba：大家好！
+小编：大家好！
+小编：我是对话小说的界面
+小编：而现在你所看见的方格子，也是由 Chatblock library （第一版）所渲染的
+小编2：大家好！我是小编2号
+小编：小编2你可以展示下，开发者应该要如何使用我们？
+小编2：好的！
+小编2：首先我等下会把分开介绍……
+小编2：（第二章）对话小说的代码介绍
+小编2：（第三章）对话小说的进阶写法
+小编2：（第四章）对话小说的创意故事
+小编2：（第五章）对话小说的故事范本
+小编2：（第六章）对话小说的故事样板
+小编：嗯~ o(*￣▽￣*)o 好兴奋啊
+
 
 linebreak#
 h1#以下显示的是原格式，大家可以参考的原本写法。
 rawscript#
+

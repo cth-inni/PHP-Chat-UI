@@ -47,7 +47,7 @@ class ChatBlock
                 $tempArray = explode("@",$roleVal);
                 if(isset($tempArray))
                 {
-                    list($name, $img) = $tempArray;
+                    list($name, $img)  = $tempArray;
                     $tempCast['name']  = $name;
                     $tempCast['img']   = $img;
                     array_push($chat['roles'],$tempCast);
@@ -95,6 +95,7 @@ class ChatBlock
                             $tempLine['name']  = $name;
                             $tempLine['sentence']   = $sentence;
                             array_push($chat['lines'],$tempLine);
+                            array_push($this->rolesList,$name); // first line name as main cast
                         }
                     }
                 }
@@ -121,11 +122,14 @@ class ChatBlock
         $this->narratorList = $narratorArray;
     }
     /**
-     * Using default html rendered chat blocks
+     * Reserved for others formation
      */
     public function output(){
         return $this->output;
     }
+    /**
+     * Using default html rendered chat blocks
+     */
     public function render(){
         $tempHtml = '<div class="chatblock">';
         foreach($this->dialogue['lines'] as $dialogue)
@@ -168,9 +172,9 @@ class ChatBlock
                 case 'decision': 
                     $tempHtml .= $this->render_decisions_holder($dialogue);
                 break;
-                case 'narrator': 
-                    $tempHtml .= $this->role_narrator($dialogue);
-                break;
+                // case 'narrator': 
+                //     $tempHtml .= $this->role_narrator($dialogue);
+                // break;
                 default: 
                     if(in_array($dialogue['name'],$this->narratorList))
                     { // Custom narrator
@@ -187,7 +191,9 @@ class ChatBlock
             }
         }
         $tempHtml .= '</div>';
-        $this->output = $tempHtml;
+        // $this->output = $tempHtml;
+        // return $this->output;
+        return $tempHtml;
     }
     public static function renderJs()
     {
