@@ -16,6 +16,6 @@
         "php": ">=7.1"
     },
     "autoload": {
-        "psr-4": {"TangHoong\\ChatBlock\\": "src/"}
+        "psr-4": {"TangHoong\\ChatBlock\\": "src"}
     }
 }
