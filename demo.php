@@ -1,4 +1,5 @@
 <?php
+require 'test.lib.php';
 require 'vendor/autoload.php';
 use \TangHoong\ChatBlock\ChatBlock as ChatUI;
 ?>
@@ -39,6 +40,11 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
             case '6': 
                 $sample = file_get_contents('./tutorial/6-starter.txt');
             break;
+            case '99': 
+                $sample = getAPIData(5);
+                var_dump($sample);
+            break;
+            
             // Dev sample stories
             case '100': 
                 $sample = file_get_contents('./sample/sample.txt');
@@ -58,6 +64,9 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
             case '105': 
                 $sample = file_get_contents('./sample/starter.template.txt');
             break;
+            case '106': 
+                $sample = file_get_contents('./sample/test.raw.txt');
+            break;
         }
         //
         // $cui = new ChatUI([
@@ -67,14 +76,20 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
         // start from here
         $cui = new ChatUI();
         // Setting
-        $cui->setColon([':','：','#']);
-        $cui->setNarrator(['Narrator','narrator','系统']);
+        // $cui->setColon([':','：']);
+        $cui->setColon(['：']);
+        $cui->setNarrator(['Narrator','narrator','系统','旁白']);
+        $cui->setBreakPoint('_EMANYAN_');
         echo sprintf('<style>%s</style>', $cui->renderCss());
         $cui->feed($sample);
+        echo $cui->showCasts(); // For header introduction, header button
+        echo $cui->showWarnings();
         echo $cui->render();
+
+
         // Output for other format
         // echo $cui->output();
-        ?>
+        // ?>
         
     </body>
 </html>

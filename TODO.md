@@ -18,6 +18,22 @@
 - [x] dev tutorial （with sample）
 - [x] allow easy mode use first line as main cast
 ## Aug 2021
+- [] default narrator ['Narrator','narrator','系统','旁白'];
+- [] default colon [':','：'];
+- [] replace --- with _ADVANCE_
+- [] custom setBreakPoint('_EMANYAN_')
+- [] reverse stories & setting template
+- [] Allow @, # in string
+- [] Added rawscript (will toggle)
+- [] Fix p, h1-h6 container
+- [] Allow adjust head size
+- [] Allow show unformatted line as warning messages (only works when single colon as index)
+- [] Allow fork script
+- [] 
+- [] 
+- [] Allow export as json 
+- [] rawscriptquote:5-10 (allow include the script in certainline)
+- [] Fork this script
 - [] navigation link button
 
 # version 2 roadmap

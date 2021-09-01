@@ -13,44 +13,48 @@ class ChatBlock
     public $output;
     public $SettingBreakPoint;
     public $SettingWhitelistTag;
+    public $settings;
     function __construct()
     {
-        // 
+        //  
         $this->rawData = '';
         $this->rolesList = [];
-        $this->SettingBreakPoint = "---";
+        $this->SettingBreakPoint = "_ADVANCE_";
         $this->SettingWhitelistTag = [
             'p','h1','h2','h3','h4','h5','h6','linebreak',
             'image','imagecard','mp3','background','youtube','decision',
-            'rawscript','codeblock',
+            'rawscript','rawscriptquote','codeblock',
             'narrator',
         ];
-        $this->colonList = ["#"];
-        $this->narratorList = ["narrator"];
+        $this->colonList = [':','：'];
+        $this->narratorList = ['Narrator','narrator','系统','旁白'];
+        //
+        $this->settings = (object)[
+            'allowForkScript' => false,
+            'chatHeaderSize'  => 'large',
+        ];
     }
     public function feed($rawData='')
     {
         $this->rawData = $rawData;
-        $chat['casts']  = 0;
-        $chat['dialog'] = 0;
-        $chat['roles']  = [];
-        $chat['lines']  = [];
-        $rolesData = strstr($rawData, $this->SettingBreakPoint, true);
-        $linesData = strstr($rawData, $this->SettingBreakPoint);
+        $chat['casts']       = [];
+        $chat['lines']       = [];
+        $chat['warnings']    = [];
+        $rolesData = strstr($rawData, $this->SettingBreakPoint);
+        $linesData = strstr($rawData, $this->SettingBreakPoint, true);
         if($rolesData != false)
         { // structure roles
             $rolesArray = array_values(array_filter(explode(PHP_EOL,$rolesData)));
-            $chat['casts'] = count($rolesArray);
             foreach($rolesArray as $roleKey => $roleVal)
             {
                 $tempCast = [];
                 $tempArray = explode("@",$roleVal);
-                if(isset($tempArray))
+                if(isset($tempArray) && count($tempArray) > 1)
                 {
                     list($name, $img)  = $tempArray;
                     $tempCast['name']  = $name;
                     $tempCast['img']   = $img;
-                    array_push($chat['roles'],$tempCast);
+                    array_push($chat['casts'],$tempCast);
                     array_push($this->rolesList,$name);
                     array_push($this->SettingWhitelistTag,$name);
                 }
@@ -63,19 +67,27 @@ class ChatBlock
             {
                 if($lineVal != $this->SettingBreakPoint)
                 {
-                    $chat['dialog'] = $chat['dialog'] + 1;
                     $tempLine = [];
                     foreach($this->colonList as $colon)
                     {
                         $tempArray = explode($colon,$lineVal);
-                        if(isset($tempArray) && count($tempArray) > 1 && in_array($tempArray[0],$this->SettingWhitelistTag))
+                        if(
+                            isset($tempArray) && count($tempArray) > 1 
+                            && (in_array($tempArray[0],$this->SettingWhitelistTag) || in_array($tempArray[0],$this->narratorList))
+                        )
                         { // whitelisted
                             list($name, $sentence) = $tempArray;
                             $tempLine['name']  = $name;
                             $tempLine['sentence']   = $sentence;
                             array_push($chat['lines'],$tempLine);
+                        }else
+                        { // Lines that not match with standard, only work in single colon as index
+                            if(!in_array($tempArray[0],$this->narratorList))
+                            {
+                                array_push($chat['warnings'],$tempArray[0]);
+                            }
                         }
-                    }
+                    }// colon loop
                 }
             }
         }else{ // structure lines // Without those image header settings, allow them to render by name only
@@ -84,7 +96,6 @@ class ChatBlock
             {
                 if($lineVal != $this->SettingBreakPoint)
                 {
-                    $chat['dialog'] = $chat['dialog'] + 1;
                     $tempLine = [];
                     foreach($this->colonList as $colon)
                     {
@@ -95,10 +106,30 @@ class ChatBlock
                             $tempLine['name']  = $name;
                             $tempLine['sentence']   = $sentence;
                             array_push($chat['lines'],$tempLine);
-                            array_push($this->rolesList,$name); // first line name as main cast
+
+                            if(!in_array($name,$this->narratorList))
+                            { // Exclude narrator
+                                array_push($this->rolesList,$name); // first line name as main cast
+                                array_unique($this->rolesList);
+                            }
+                        }else
+                        { // Lines that not match with standard, only work in single colon as index
+                            if(!in_array($tempArray[0],$this->narratorList))
+                            {
+                                array_push($chat['warnings'],$tempArray[0]);
+                            }
                         }
                     }
                 }
+            }
+            $tempRoles = array_diff($this->rolesList, $this->SettingWhitelistTag);
+            $tempRoles = array_values(array_unique($tempRoles));
+            foreach($tempRoles as $tempRolesKey)
+            {
+                $tempCast = [];
+                $tempCast['name']  = $tempRolesKey;
+                $tempCast['img']   = null;
+                array_push($chat['casts'], $tempCast);
             }
         }
         $this->dialogue = $chat;
@@ -122,16 +153,54 @@ class ChatBlock
         $this->narratorList = $narratorArray;
     }
     /**
+     * Set Breakpoint
+     */
+    public function setBreakPoint($newBreakPoint = ''){
+        $this->SettingBreakPoint = $newBreakPoint;
+    }
+    /**
      * Reserved for others formation
      */
     public function output(){
         return $this->output;
     }
     /**
+     * Show error message
+     */
+    public function showWarnings(){
+        $tempHtml = '<div class="chatblock">';
+        foreach($this->dialogue['warnings'] as $line)
+        {
+            $tempHtml .= $this->render_warningsblock($line);
+        }
+        $tempHtml .= '</div>';
+        return $tempHtml;
+    }
+    /**
+     * Show error message
+     */
+    public function showCasts(){
+        $tempHtml  = '<div class="chatblock">';
+        $tempHtml .= '<div class="imessage casts-list">';
+        foreach($this->dialogue['casts'] as $cast)
+        {
+            $tempHtml .= '<div class="chat-name">';
+            $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($cast['name']).'">'.$cast['name'];
+            $tempHtml .= '</div>';
+        }
+        $tempHtml .= '</div>';
+        $tempHtml .= '</div>';
+        return $tempHtml;
+    }
+    /**
      * Using default html rendered chat blocks
      */
     public function render(){
         $tempHtml = '<div class="chatblock">';
+        // foreach($this->dialogue['warnings'] as $line)
+        // {
+        //     $tempHtml .= $this->render_warningsblock($line);
+        // }
         foreach($this->dialogue['lines'] as $dialogue)
         {
             switch($dialogue['name'])
@@ -147,8 +216,11 @@ class ChatBlock
                 case 'p': 
                     $tempHtml .= $this->render_text($dialogue);
                 break;
-                case 'rawscript': 
+                case 'rawscriptquote': 
                     $tempHtml .= $this->render_rawdata($dialogue,$this->rawData);
+                break;
+                case 'rawscript': 
+                    $tempHtml .= $this->render_rawdata_full($dialogue,$this->rawData);
                 break;
                 case 'codeblock': 
                     $tempHtml .= $this->render_codeblock($dialogue);
@@ -205,7 +277,15 @@ class ChatBlock
     {
         ob_start();
         require 'chatblock.css';
+        // echo $this->dynamicCss();
         return ob_get_clean();
+    }
+    // Dynamic
+    private function dynamicCss()
+    {
+        $tempCss  = '';
+        $tempCss .= '.chatblock .imessage .chat-header {width: '.$this->settings->chatHeaderSize.';height: '.$this->settings->chatHeaderSize.';}';
+        return $tempCss;
     }
     // Multimedia
     private function render_imagecard_holder($dialogue)
@@ -242,6 +322,25 @@ class ChatBlock
         $tempHtml  = '<pre><code>'.($rawData).'</code></pre>';
         return $tempHtml;
     }
+    private function render_rawdata_full($dialogue, $rawData)
+    {
+        // $your_array = explode("\n", $rawData);
+        // $arr = explode("\n", $your_array);
+        $tempHtml  = '<div class="readingStory-changes well margin-top-2x padding-sm">';
+        $tempHtml .= '<a class="btn btn-default btn-xs" data-toggle="collapse" data-target="#readingStory-changes-chatblock">显示原始对话剧本</a>';
+        if($this->settings->allowForkScript)
+        {
+            $tempHtml .= '<a class="btn btn-default btn-xs" href="#" target="_blank">拷贝对话剧本</a>';
+        }
+        $tempHtml .= '<pre id="readingStory-changes-chatblock" class="margin-top-lg collapse"><code>'.($rawData).'</code></pre>';
+        $tempHtml .= '</div>';
+        return $tempHtml;
+    }
+    private function render_warningsblock($lines)
+    {
+        $tempHtml  = '<pre><code>Line "'.($lines).'" does not recognized.</code></pre>';
+        return $tempHtml;
+    }
     private function render_codeblock($dialogue)
     {
         $sentence  = $this->fn_filter($dialogue['sentence']);
@@ -252,15 +351,19 @@ class ChatBlock
     private function render_text($dialogue)
     {
         $sentence  = $this->fn_filter($dialogue['sentence']);
-        $tempHtml  = '<p class="comment">'.$sentence.'</p>';
+        $tempHtml  = '<div class="imessage">';
+        $tempHtml .= '<p class="comment">'.$sentence.'</p>';
+        $tempHtml .= '</div>';
         return $tempHtml;
     }
     private function render_heading($dialogue)
     {
         $link = $this->fn_valid_link($dialogue['sentence']);
-        $tempHtml   = '<'.strtolower($dialogue['name']).'>';
+        $tempHtml   = '<div class="imessage">';
+        $tempHtml  .= '<'.strtolower($dialogue['name']).'>';
         $tempHtml  .= $dialogue['sentence'];
         $tempHtml  .= '</'.strtolower($dialogue['name']).'>';
+        $tempHtml  .= '</div>';
         return $tempHtml;
     }
     private function render_image_holder($dialogue)
@@ -341,7 +444,16 @@ class ChatBlock
         {
             $tempHtml .= $dialogue['name'];
         }else{
-            $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+            switch($this->settings->chatHeaderSize)
+            {
+                default:
+                case 'normal':
+                    $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+                break;
+                case 'large':
+                    $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+                break;
+            }
         }
         $tempHtml .= '</div>';
         $tempHtml .= '<p class="from-them">'.$sentence.'</p>';
@@ -358,7 +470,16 @@ class ChatBlock
         {
             $tempHtml .= $dialogue['name'];
         }else{
-            $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+            switch($this->settings->chatHeaderSize)
+            {
+                default:
+                case 'normal':
+                    $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+                break;
+                case 'large':
+                    $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+                break;
+            }
         }
         $tempHtml .= '</div>';
         $tempHtml .= '<p class="from-me">'.$sentence.'</p>';
@@ -367,7 +488,7 @@ class ChatBlock
     }
     private function loadChatHeaderImg($castName)
     {
-        foreach($this->dialogue['roles'] as $cast)
+        foreach($this->dialogue['casts'] as $cast)
         {
             if($cast['name'] == $castName)
             {
