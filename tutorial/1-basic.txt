@@ -1,9 +1,4 @@
-小编@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
-小编2@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
-
----
-
-h1#（第一章）对话小说的介绍
+h1：（第一章）对话小说的介绍
 
 小编：大家好！
 小编：我是对话小说的界面
@@ -21,6 +16,11 @@ h1#（第一章）对话小说的介绍
 
 
 narrator：本末尾将附上对话剧本的源文档，大家可以参考和对比写法吧！
-linebreak#
-h4#以下显示的是原格式，大家可以参考的原本写法。
-rawscript#
+linebreak：
+h4：以下显示的是原格式，大家可以参考的原本写法。
+rawscript：
+
+_EMANYAN_
+
+小编@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
+小编2@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg

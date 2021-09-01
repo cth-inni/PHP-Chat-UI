@@ -1,37 +1,43 @@
+
+background：//filesamples.com/samples/audio/mp3/sample3.mp3
+narrator：此范本用来展示所有可以被呼叫的格式。
+narrator：Once upon a time...
+image：//media1.giphy.com/media/144Q1gg0FkTEVG/giphy.gif?title=John+Doe&desc=Contrary to popular belief, Lorem Ipsum is not simply random text.
+Snake：要不要吃苹果 🍎🍎🍎？
+Eve：好的，为何不要？
+p：Eve 拿了苹果之后开始吃……
+小康：傻瓜！不要啊！
+h1：Eve 感觉到头晕。
+h2：Eve 眼前一切模糊不已
+h3：Eve 感觉到身体发热
+h4：Eve 身体开始缩小
+h5：Eve 越来越矮
+h6：Eve 她变成了萝莉
+linebreak：
+Snake：It is too late! hahaha!
+Tiger：It is too late! hahaha!
+Dog：It is too late! hahaha!
+Cat：It is too late! hahaha!
+
+narrator：Thats why human have been cast <u>far</u> <b>far</b> <i>far</i> <u><b><i>far</i></b></u> away.. end of the story.FIN.👍
+
+imagecard：//i.imgur.com/pW71NE5.jpeg?title=John+Doe&desc=Contrary to popular belief, Lorem Ipsum is not simply random text.
+imagecard：//media1.giphy.com/media/144Q1gg0FkTEVG/giphy.gif?title=Zelda&desc=Dance gif.
+image：//i.imgur.com/pW71NE5.jpeg?color=red
+mp3：//filesamples.com/samples/audio/mp3/sample3.mp3
+youtube：//www.youtube.com/embed/tgbNymZ7vqY?controls=0
+decision：Look at=Left,Right
+decision：I want to eat=Apple,Banana,Coconut
+decision：I choose to walk=左边,中间,右边,上面,下面
+
+linebreak：
+rawscript：
+
+_EMANYAN_
+
 小康@//i.imgur.com/pW71NE5.jpeg?color=red
 Eve@//i.imgur.com/Jvh1OQm.jpeg?color=blue
 Snake@//i.imgur.com/FEiFVeO.png?color=green
----
-background#//filesamples.com/samples/audio/mp3/sample3.mp3
-narrator#此范本用来展示所有可以被呼叫的格式。
-narrator#Once upon a time...
-image#//media1.giphy.com/media/144Q1gg0FkTEVG/giphy.gif?title=John+Doe&desc=Contrary to popular belief, Lorem Ipsum is not simply random text.
-Snake#要不要吃苹果 🍎🍎🍎？
-Eve#好的，为何不要？
-p#Eve 拿了苹果之后开始吃……
-小康#傻瓜！不要啊！
-h1#Eve 感觉到头晕。
-h2#Eve 眼前一切模糊不已
-h3#Eve 感觉到身体发热
-h4#Eve 身体开始缩小
-h5#Eve 越来越矮
-h6#Eve 她变成了萝莉
-linebreak#
-Snake#It is too late! hahaha!
-Tiger#It is too late! hahaha!
-Dog#It is too late! hahaha!
-Cat#It is too late! hahaha!
-
-narrator#Thats why human have been cast <u>far</u> <b>far</b> <i>far</i> <u><b><i>far</i></b></u> away.. end of the story.FIN.👍
-
-imagecard#//i.imgur.com/pW71NE5.jpeg?title=John+Doe&desc=Contrary to popular belief, Lorem Ipsum is not simply random text.
-imagecard#//media1.giphy.com/media/144Q1gg0FkTEVG/giphy.gif?title=Zelda&desc=Dance gif.
-image#//i.imgur.com/pW71NE5.jpeg?color=red
-mp3#//filesamples.com/samples/audio/mp3/sample3.mp3
-youtube#//www.youtube.com/embed/tgbNymZ7vqY?controls=0
-decision#Look at=Left,Right
-decision#I want to eat=Apple,Banana,Coconut
-decision#I choose to walk=左边,中间,右边,上面,下面
-
-linebreak#
-rawscript#
+Tiger@//i.imgur.com/Jvh1OQm.jpeg?color=blue
+Dog@//i.imgur.com/Jvh1OQm.jpeg?color=blue
+Cat@//i.imgur.com/Jvh1OQm.jpeg?color=blue

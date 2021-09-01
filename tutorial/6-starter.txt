@@ -1,7 +1,3 @@
-小编@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
-Baba@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
-小编2@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
----
 Baba：大家好！
 小编：大家好！
 小编：我是对话小说的界面
@@ -17,8 +13,12 @@ Baba：大家好！
 小编2：（第六章）对话小说的故事样板
 小编：嗯~ o(*￣▽￣*)o 好兴奋啊
 
+linebreak：
+h1：以下显示的是原格式，大家可以参考的原本写法。
+rawscript：
 
-linebreak#
-h1#以下显示的是原格式，大家可以参考的原本写法。
-rawscript#
+_EMANYAN_
 
+小编@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
+Baba@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
+小编2@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg

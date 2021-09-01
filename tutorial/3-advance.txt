@@ -1,4 +1,4 @@
 
-linebreak#
-h1#以下显示的是原格式，大家可以参考的原本写法。
-rawscript#
+linebreak：
+h1：以下显示的是原格式，大家可以参考的原本写法。
+rawscript：
