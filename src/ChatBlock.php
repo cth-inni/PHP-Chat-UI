@@ -14,25 +14,35 @@ class ChatBlock
     public $SettingBreakPoint;
     public $SettingWhitelistTag;
     public $settings;
-    function __construct()
+    public $currentCast;
+    function __construct($newObj=null)
     {
-        //  
+        // default
         $this->rawData = '';
+        $this->currentCast = '';
         $this->rolesList = [];
         $this->SettingBreakPoint = "_ADVANCE_";
         $this->SettingWhitelistTag = [
             'p','h1','h2','h3','h4','h5','h6','linebreak',
             'image','imagecard','mp3','background','youtube','decision',
-            'rawscript','rawscriptquote','codeblock',
-            'narrator',
+            'rawscript','rawscriptquote','codeblock','link',
+            'narrator','profilecard',
         ];
         $this->colonList = [':','：'];
         $this->narratorList = ['Narrator','narrator','系统','旁白'];
-        //
-        $this->settings = (object)[
+        // default setting
+        $oriObj = [
             'allowForkScript' => false,
-            'chatHeaderSize'  => 'large',
+            'chatHeaderSize'  => 'normal',
         ];
+        if(is_null($newObj))
+        {
+            $defObj = $oriObj;
+        }else{
+            $defObj = $this->_mergeRecursively((object)$oriObj,(object)$newObj);
+        }
+        // merged setting
+        $this->settings = (object)$defObj;
     }
     public function feed($rawData='')
     {
@@ -180,12 +190,25 @@ class ChatBlock
      * Show error message
      */
     public function showCasts(){
-        $tempHtml  = '<div class="chatblock">';
-        $tempHtml .= '<div class="imessage casts-list">';
+        $tempHtml  = '<div class="chatblock" style="overflow-x:auto;">';
+        $tempHtml .= '<div class="imessage casts-list" style="margin:0 !important;">';
         foreach($this->dialogue['casts'] as $cast)
         {
             $tempHtml .= '<div class="chat-name">';
-            $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($cast['name']).'">'.$cast['name'];
+            // $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($cast['name']).'">'.$cast['name'];
+            switch($this->settings->chatHeaderSize)
+            {
+                default:
+                case 'small':
+                    $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($cast['name']).'">'.$cast['name'];
+                break;
+                case 'normal':
+                    $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($cast['name']).'">'.$cast['name'];
+                break;
+                case 'large':
+                    $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($cast['name']).'">'.$cast['name'];
+                break;
+            }
             $tempHtml .= '</div>';
         }
         $tempHtml .= '</div>';
@@ -280,12 +303,49 @@ class ChatBlock
         // echo $this->dynamicCss();
         return ob_get_clean();
     }
+    /**
+     * Recursively merges two objects and returns a resulting object.
+     * @param object $obj1 The base object
+     * @param object $obj2 The merge object
+     * @return object The merged object
+     */
+    private function _mergeRecursively($obj1, $obj2) {
+        if (is_object($obj2)) {
+            $keys = array_keys(get_object_vars($obj2));
+            foreach ($keys as $key) {
+                if (
+                    isset($obj1->{$key})
+                    && is_object($obj1->{$key})
+                    && is_object($obj2->{$key})
+                ) {
+                    $obj1->{$key} = $this->_mergeRecursively($obj1->{$key}, $obj2->{$key});
+                } elseif (isset($obj1->{$key})
+                && is_array($obj1->{$key})
+                && is_array($obj2->{$key})) {
+                    $obj1->{$key} = $this->_mergeRecursively($obj1->{$key}, $obj2->{$key});
+                } else {
+                    $obj1->{$key} = $obj2->{$key};
+                }
+            }
+        } elseif (is_array($obj2)) {
+            if (
+                is_array($obj1)
+                && is_array($obj2)
+            ) {
+                $obj1 = array_merge_recursive($obj1, $obj2);
+            } else {
+                $obj1 = $obj2;
+            }
+        }
+
+        return $obj1;
+    }
     // Dynamic
     private function dynamicCss()
     {
-        $tempCss  = '';
-        $tempCss .= '.chatblock .imessage .chat-header {width: '.$this->settings->chatHeaderSize.';height: '.$this->settings->chatHeaderSize.';}';
-        return $tempCss;
+        // $tempCss  = '';
+        // $tempCss .= '.chatblock .imessage .chat-header {width: '.$this->settings->chatHeaderSize.';height: '.$this->settings->chatHeaderSize.';}';
+        // return $tempCss;
     }
     // Multimedia
     private function render_imagecard_holder($dialogue)
@@ -438,24 +498,31 @@ class ChatBlock
     {
         $sentence = $this->fn_filter($dialogue['sentence']);
         $tempHtml  = '<div class="imessage">';
-        $tempHtml .= '<div class="chat-name chat-name-them">';
-        $chatHeaderImg = $this->loadChatHeaderImg($dialogue['name']);
-        if($chatHeaderImg == false)
+        if($this->currentCast !== $dialogue['name'])
         {
-            $tempHtml .= $dialogue['name'];
-        }else{
-            switch($this->settings->chatHeaderSize)
+            $this->currentCast = $dialogue['name'];
+            $tempHtml .= '<div class="chat-name chat-name-them">';
+            $chatHeaderImg = $this->loadChatHeaderImg($dialogue['name']);
+            if($chatHeaderImg == false)
             {
-                default:
-                case 'normal':
-                    $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
-                break;
-                case 'large':
-                    $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
-                break;
+                $tempHtml .= $dialogue['name'];
+            }else{
+                switch($this->settings->chatHeaderSize)
+                {
+                    default:
+                    case 'small':
+                        $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+                    break;
+                    case 'normal':
+                        $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+                    break;
+                    case 'large':
+                        $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+                    break;
+                }
             }
+            $tempHtml .= '</div>';
         }
-        $tempHtml .= '</div>';
         $tempHtml .= '<p class="from-them">'.$sentence.'</p>';
         $tempHtml .= '</div>';
         return $tempHtml;
@@ -464,24 +531,31 @@ class ChatBlock
     {
         $sentence  = $this->fn_filter($dialogue['sentence']);
         $tempHtml  = '<div class="imessage">';
-        $tempHtml .= '<div class="chat-name chat-name-me">';
-        $chatHeaderImg = $this->loadChatHeaderImg($dialogue['name']);
-        if($chatHeaderImg == false)
+        if($this->currentCast !== $dialogue['name'])
         {
-            $tempHtml .= $dialogue['name'];
-        }else{
-            switch($this->settings->chatHeaderSize)
+            $this->currentCast = $dialogue['name'];
+            $tempHtml .= '<div class="chat-name chat-name-me">';
+            $chatHeaderImg = $this->loadChatHeaderImg($dialogue['name']);
+            if($chatHeaderImg == false)
             {
-                default:
-                case 'normal':
-                    $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
-                break;
-                case 'large':
-                    $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
-                break;
+                $tempHtml .= $dialogue['name'];
+            }else{
+                switch($this->settings->chatHeaderSize)
+                {
+                    default:
+                    case 'small':
+                        $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+                    break;
+                    case 'normal':
+                        $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+                    break;
+                    case 'large':
+                        $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.$dialogue['name'];
+                    break;
+                }
             }
+            $tempHtml .= '</div>';
         }
-        $tempHtml .= '</div>';
         $tempHtml .= '<p class="from-me">'.$sentence.'</p>';
         $tempHtml .= '</div>';
         return $tempHtml;

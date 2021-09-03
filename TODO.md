@@ -18,32 +18,31 @@
 - [x] dev tutorial （with sample）
 - [x] allow easy mode use first line as main cast
 ## Aug 2021
-- [] default narrator ['Narrator','narrator','系统','旁白'];
-- [] default colon [':','：'];
-- [] replace --- with _ADVANCE_
-- [] custom setBreakPoint('_EMANYAN_')
-- [] reverse stories & setting template
-- [] Allow @, # in string
-- [] Added rawscript (will toggle)
-- [] Fix p, h1-h6 container
-- [] Allow adjust head size
-- [] Allow show unformatted line as warning messages (only works when single colon as index)
-- [] Allow fork script
-- [] 
-- [] 
-- [] Allow export as json 
-- [] rawscriptquote:5-10 (allow include the script in certainline)
-- [] Fork this script
-- [] navigation link button
+- [x] default narrator ['Narrator','narrator','系统','旁白'];
+- [x] default colon [':','：'];
+- [x] replace --- with _ADVANCE_
+- [x] custom setBreakPoint('_I_LOVE_EMANYAN_')
+- [x] setting template
+- [x] Allow @, # in string
+- [x] Added rawscript (will toggle use site class)
+- [x] Fix p, h1-h6 container
+- [x] Allow adjust head size
+- [x] Show once header if the lines belongs to same person
+- [x] Allow show unformatted line as warning messages (only works when single colon as index)
+- [x] Allow export as json 
+- [x] showCasts()
 
 # version 2 roadmap
-- [] global setting before render
+- [] reverse stories (switch lines to major based on header)
+- [] rawscriptquote:5-10 (allow include the script in certainline)
+- [] Fork this script (button only, default false)
+- [] Allow fork script (editor)
+- [] action button
+- [] link button
+- [] Invalid Image handle
 - [] default head image for minor casts (assign a random background color)
 - [] JS editor (shortcut & preview)
 - [] export format (txt,json,csv,custom)
 
-
-
-# refer
-对话里面，如果有这种卡片效果的插图，会打扰阅读体验吗？
-https://codepen.io/nicolaspavlotsky/pen/wqGgLO?editors=1100
+# resources
+[profile card](https://codepen.io/nicolaspavlotsky/pen/wqGgLO?editors=1100)

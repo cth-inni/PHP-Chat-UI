@@ -56,13 +56,16 @@ break;
 case '106': 
 $sample = file_get_contents('./sample/test.raw.txt');
 break;
+case '107': 
+$sample = file_get_contents('./sample/story.2.1.txt');
+break;
 }
 //
 header('Content-Type: application/json');  // <-- header declaration
 $cui = new ChatUI();
 $cui->setColon(['：']);
 $cui->setNarrator(['Narrator','narrator','系统','旁白']);
-$cui->setBreakPoint('_EMANYAN_');
+$cui->setBreakPoint('_I_LOVE_EMANYAN_');
 $cui->feed($sample);
 echo $cui->json();
 ?>

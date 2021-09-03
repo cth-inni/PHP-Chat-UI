@@ -34,7 +34,7 @@
     color: #fff; 
   }
   
-  .chatblock p.from-me::before {
+  /* .chatblock p.from-me::before {
     border-bottom-left-radius: 0.8rem 0.7rem;
     border-right: 1rem solid #248bf5;
     right: -0.25rem;
@@ -47,7 +47,7 @@
     right: -40px;
     transform:translate(-30px, -2px);
     width: 10px;
-  }
+  } */
   
   .chatblock p[class^="from-"] {
     margin: 0.5rem 0;
@@ -78,7 +78,7 @@
     color: #000;
   }
   
-  .chatblock p.from-them:before {
+  /* .chatblock p.from-them:before {
     border-bottom-right-radius: 0.8rem 0.7rem;
     border-left: 1rem solid #e5e5ea;
     left: -0.35rem;
@@ -91,7 +91,7 @@
     left: 20px;
     transform: translate(-30px, -2px);
     width: 10px;
-  }
+  } */
   
   .chatblock p[class^="from-"].emoji {
     background: none;
@@ -167,22 +167,27 @@
   
     .chatblock .imessage {
       font-size: inherit;
-      margin: 0 auto 1rem;
+      margin: 0 auto;
       max-width: 600px;
       padding: 0.25rem 0.875rem;
     }
   
     .chatblock .imessage p {
-      margin: 0.5rem 0;
+      margin: 0.2rem 0;
     }
   }
 
 
   /* chat-header */
 .chatblock .imessage .chat-header,
+.chatblock .imessage .chat-header-s,
 .chatblock .imessage .chat-header-xl {
     border-radius: 1.5em;
     margin: .5em;
+}
+.chatblock .imessage .chat-header-s {
+  width: 1.5em;
+  height: 1.5em;
 }
 .chatblock .imessage .chat-header {
     width: 2em;
@@ -326,6 +331,6 @@
 
 .chatblock .casts-list{
   display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  flex-direction: row;
+  justify-content: start;
 }

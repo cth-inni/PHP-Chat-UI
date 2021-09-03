@@ -17,7 +17,7 @@ linebreak：
 h1：以下显示的是原格式，大家可以参考的原本写法。
 rawscript：
 
-_EMANYAN_
+_I_LOVE_EMANYAN_
 
 小编@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg
 Baba@//cdn.emanyan.com/uploads/author/thumbnail/e1b6dd94428bae0eaa06ad43bf6d879e70330c5f.adaptiveResize.100x100.jpg

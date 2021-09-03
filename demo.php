@@ -67,6 +67,9 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
             case '106': 
                 $sample = file_get_contents('./sample/test.raw.txt');
             break;
+            case '107': 
+                $sample = file_get_contents('./sample/story.2.1.txt');
+            break;
         }
         //
         // $cui = new ChatUI([
@@ -74,16 +77,22 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
         // ]);
         // $cui->setDefaultChatImgHeader('/img/path.ext');
         // start from here
-        $cui = new ChatUI();
+        // $cui = new ChatUI();
+        $cui = new ChatUI([
+            'chatHeaderSize' => 'large' // default:normal,small,large
+        ]);
+        // echo '<pre>';
+        // var_dump($cui->settings->chatHeaderSize);
+        // die();
         // Setting
         // $cui->setColon([':','：']);
         $cui->setColon(['：']);
         $cui->setNarrator(['Narrator','narrator','系统','旁白']);
-        $cui->setBreakPoint('_EMANYAN_');
+        $cui->setBreakPoint('_I_LOVE_EMANYAN_');
         echo sprintf('<style>%s</style>', $cui->renderCss());
         $cui->feed($sample);
-        echo $cui->showCasts(); // For header introduction, header button
         echo $cui->showWarnings();
+        echo $cui->showCasts(); // For header introduction, header button
         echo $cui->render();
 
 

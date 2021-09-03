@@ -33,7 +33,7 @@ decision：I choose to walk=左边,中间,右边,上面,下面
 linebreak：
 rawscript：
 
-_EMANYAN_
+_I_LOVE_EMANYAN_
 
 小康@//i.imgur.com/pW71NE5.jpeg?color=red
 Eve@//i.imgur.com/Jvh1OQm.jpeg?color=blue
