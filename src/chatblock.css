@@ -334,3 +334,26 @@
   flex-direction: row;
   justify-content: start;
 }
+
+.rawscript-chatblock-container{
+  position: relative;
+}
+
+.rawscript-chatblock-container a{
+  cursor: pointer;
+}
+
+.rawscript-chatblock-editor{
+  position: absolute;
+  top: 0px;
+  right: 10px;
+}
+
+.rawscript-chatblock-editor textarea{
+  display: none;
+}
+
+.rawscript-chatblock-container{
+  height: 30px;
+  overflow: auto;
+}

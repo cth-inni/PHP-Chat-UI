@@ -32,7 +32,7 @@ class ChatBlock
         $this->narratorList = ['Narrator','narrator','系统','旁白'];
         // default setting
         $oriObj = [
-            'allowForkScript' => false,
+            'allowForkScript' => null,
             'chatHeaderSize'  => 'normal',
         ];
         if(is_null($newObj))
@@ -286,6 +286,8 @@ class ChatBlock
             }
         }
         $tempHtml .= '</div>';
+        $tempHtml .= '<hr/>';
+        $tempHtml .= $this->render_rawdata_full(null,$this->rawData);
         // $this->output = $tempHtml;
         // return $this->output;
         return $tempHtml;
@@ -386,11 +388,16 @@ class ChatBlock
     {
         // $your_array = explode("\n", $rawData);
         // $arr = explode("\n", $your_array);
-        $tempHtml  = '<div class="readingStory-changes well margin-top-2x padding-sm">';
+        $tempHtml  = '<div class="readingStory-changes well margin-top-2x padding-sm rawscript-chatblock-container">';
         $tempHtml .= '<a class="btn btn-default btn-xs" data-toggle="collapse" data-target="#readingStory-changes-chatblock">显示原始对话剧本</a>';
-        if($this->settings->allowForkScript)
+        if(isset($this->settings->allowForkScript))
         {
-            $tempHtml .= '<a class="btn btn-default btn-xs" href="#" target="_blank">拷贝对话剧本</a>';
+            $tempHtml .= '<div id="rawscript-chatblock-editor" class="rawscript-chatblock-editor">';
+            $tempHtml .= '<form method="POST" target="_blank" action="'.$this->settings->allowForkScript.'">';
+            $tempHtml .= '<button type="submit" class="btn btn-default btn-xs">拷贝对话剧本</button><br/>';
+            $tempHtml .= '<textarea name="rawscript">'.$rawData.'</textarea>';
+            $tempHtml .= '</div>';
+            $tempHtml .= '</form>';
         }
         $tempHtml .= '<pre id="readingStory-changes-chatblock" class="margin-top-lg collapse"><code>'.($rawData).'</code></pre>';
         $tempHtml .= '</div>';

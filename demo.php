@@ -79,6 +79,8 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
         // start from here
         // $cui = new ChatUI();
         $cui = new ChatUI([
+            // 'allowForkScript' => 'https://chat-editor.tanghoong.com',  // default:null
+            'allowForkScript' => 'editor.php',  // default:null
             'chatHeaderSize' => 'large' // default:normal,small,large
         ]);
         // echo '<pre>';
@@ -95,10 +97,33 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
         echo $cui->showCasts(); // For header introduction, header button
         echo $cui->render();
 
-
         // Output for other format
         // echo $cui->output();
         // ?>
-        
+        <style>
+        .rawscript-chatblock-editor button{
+            display: block;  
+        }
+        </style>
+        <script async defer>
+            /* Ignore below, no copy needed */
+            function toggleHeight() {
+                var rawscriptContainer = document.querySelector(".rawscript-chatblock-container"); 
+                var rawscriptContainerToggle = document.querySelector(".rawscript-chatblock-container a"); 
+                var toggleStatus = rawscriptContainerToggle.dataset.toggle;
+                if( rawscriptContainerToggle.dataset.toggle == 'collapse' )
+                {
+                    rawscriptContainerToggle.dataset.toggle = 'expand';
+                    rawscriptContainer.style.height = '100%';
+                }else{
+                    rawscriptContainerToggle.dataset.toggle = 'collapse';
+                    rawscriptContainer.style.height = '30px';
+                }
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                var rawscriptContainerToggle = document.querySelector(".rawscript-chatblock-container a"); 
+                rawscriptContainerToggle.addEventListener("click", toggleHeight, false);
+            });
+        </script>
     </body>
 </html>
