@@ -32,8 +32,10 @@ class ChatBlock
         $this->narratorList = ['Narrator','narrator','系统','旁白'];
         // default setting
         $oriObj = [
-            'allowForkScript' => null,
-            'chatHeaderSize'  => 'normal',
+            'allowForkScript'   => null,
+            'chatHeaderSize'    => 'normal',
+            'mainCastColor'     => '#248bf5',
+            'castsColorsRange'  => '100,200', // 0 - 255
         ];
         if(is_null($newObj))
         {
@@ -126,7 +128,10 @@ class ChatBlock
                         { // Lines that not match with standard, only work in single colon as index
                             if(!in_array($tempArray[0],$this->narratorList))
                             {
-                                array_push($chat['warnings'],$tempArray[0]);
+                                // array_push($chat['warnings'],$tempArray[0]);
+                                $tempLine['name']  = 'p';
+                                $tempLine['sentence']   = $tempArray[0];
+                                array_push($chat['lines'],$tempLine);
                             }
                         }
                     }
@@ -137,12 +142,30 @@ class ChatBlock
             foreach($tempRoles as $tempRolesKey)
             {
                 $tempCast = [];
-                $tempCast['name']  = $tempRolesKey;
-                $tempCast['img']   = null;
+                $tempCast['name']    = $tempRolesKey;
+                $tempCast['img']     = null;
+                $tempCast['color']   = $this->randomColor($this->settings->castsColorsRange);
                 array_push($chat['casts'], $tempCast);
             }
         }
         $this->dialogue = $chat;
+    }
+    public function randomColor ($rangeVal = '0,255')
+    {
+        $minMaxVal = explode(',',$rangeVal);
+        $minVal = $minMaxVal[0];
+        $maxVal = $minMaxVal[1];
+        // Make sure the parameters will result in valid colours
+        $minVal = $minVal < 0 || $minVal > 255 ? 0 : $minVal;
+        $maxVal = $maxVal < 0 || $maxVal > 255 ? 255 : $maxVal;
+    
+        // Generate 3 values
+        $r = mt_rand($minVal, $maxVal);
+        $g = mt_rand($minVal, $maxVal);
+        $b = mt_rand($minVal, $maxVal);
+    
+        // Return a hex colour ID string
+        return sprintf('#%02X%02X%02X', $r, $g, $b);
     }
     /**
      * To allow using as Json format for frontend rendering
@@ -195,21 +218,23 @@ class ChatBlock
         foreach($this->dialogue['casts'] as $cast)
         {
             $tempHtml .= '<div class="chat-name">';
-            // $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($cast['name']).'">'.$cast['name'];
-            switch($this->settings->chatHeaderSize)
+            if($this->loadChatHeaderImg($cast['name']) !== false)
             {
-                default:
-                case 'small':
-                    $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($cast['name']).'">'.$cast['name'];
-                break;
-                case 'normal':
-                    $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($cast['name']).'">'.$cast['name'];
-                break;
-                case 'large':
-                    $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($cast['name']).'">'.$cast['name'];
-                break;
+                switch($this->settings->chatHeaderSize)
+                {
+                    default:
+                    case 'small':
+                        $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($cast['name']).'">';
+                    break;
+                    case 'normal':
+                        $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($cast['name']).'">';
+                    break;
+                    case 'large':
+                        $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($cast['name']).'">';
+                    break;
+                }
             }
-            $tempHtml .= '</div>';
+            $tempHtml .= $cast['name'].'</div>';
         }
         $tempHtml .= '</div>';
         $tempHtml .= '</div>';
@@ -234,37 +259,48 @@ class ChatBlock
                 case 'h4': 
                 case 'h5': 
                 case 'h6': 
+                    $this->currentCast = null;
                     $tempHtml .= $this->render_heading($dialogue);
                 break;
                 case 'p': 
+                    $this->currentCast = null;
                     $tempHtml .= $this->render_text($dialogue);
                 break;
                 case 'rawscriptquote': 
+                    $this->currentCast = null;
                     $tempHtml .= $this->render_rawdata($dialogue,$this->rawData);
                 break;
                 case 'rawscript': 
+                    $this->currentCast = null;
                     $tempHtml .= $this->render_rawdata_full($dialogue,$this->rawData);
                 break;
                 case 'codeblock': 
+                    $this->currentCast = null;
                     $tempHtml .= $this->render_codeblock($dialogue);
                 break;
                 case 'linebreak': 
+                    $this->currentCast = null;
                     $tempHtml .= '<hr/>';
                 break;
                 case 'image': 
+                    $this->currentCast = null;
                     $tempHtml .= $this->render_image_holder($dialogue);
                 break;
                 case 'imagecard': 
+                    $this->currentCast = null;
                     $tempHtml .= $this->render_imagecard_holder($dialogue);
                 break;
                 case 'mp3': 
                 case 'background': 
+                    $this->currentCast = null;
                     $tempHtml .= $this->render_sound_holder($dialogue);
                 break;
                 case 'youtube': 
+                    $this->currentCast = null;
                     $tempHtml .= $this->render_video_holder($dialogue);
                 break;
                 case 'decision': 
+                    $this->currentCast = null;
                     $tempHtml .= $this->render_decisions_holder($dialogue);
                 break;
                 // case 'narrator': 
@@ -273,6 +309,7 @@ class ChatBlock
                 default: 
                     if(in_array($dialogue['name'],$this->narratorList))
                     { // Custom narrator
+                        $this->currentCast = null;
                         $tempHtml .= $this->role_narrator($dialogue);
                     }else{
                         if( isset($this->rolesList[0]) && $this->rolesList[0] == $dialogue['name'])
@@ -394,7 +431,7 @@ class ChatBlock
         {
             $tempHtml .= '<div id="rawscript-chatblock-editor" class="rawscript-chatblock-editor">';
             $tempHtml .= '<form method="POST" target="_blank" action="'.$this->settings->allowForkScript.'">';
-            $tempHtml .= '<button type="submit" class="btn btn-default btn-xs">拷贝对话剧本</button><br/>';
+            $tempHtml .= '<button type="submit" class="btn btn-default btn-xs">玩玩本章对话剧本</button><br/>';
             $tempHtml .= '<textarea name="rawscript">'.$rawData.'</textarea>';
             $tempHtml .= '</div>';
             $tempHtml .= '</form>';
@@ -503,8 +540,9 @@ class ChatBlock
     }
     private function role_leftSide($dialogue)
     {
-        $sentence = $this->fn_filter($dialogue['sentence']);
+        // Normal
         $tempHtml  = '<div class="imessage">';
+        $chatColor = $this->loadCastColor($dialogue['name']);
         if($this->currentCast !== $dialogue['name'])
         {
             $this->currentCast = $dialogue['name'];
@@ -512,7 +550,7 @@ class ChatBlock
             $chatHeaderImg = $this->loadChatHeaderImg($dialogue['name']);
             if($chatHeaderImg == false)
             {
-                $tempHtml .= $dialogue['name'];
+                $tempHtml .= '<b style="color:'.$chatColor.'!important;">'.$dialogue['name'].'</b>';
             }else{
                 switch($this->settings->chatHeaderSize)
                 {
@@ -530,13 +568,41 @@ class ChatBlock
             }
             $tempHtml .= '</div>';
         }
-        $tempHtml .= '<p class="from-them">'.$sentence.'</p>';
+        // Checkif valid URL
+        if (filter_var($dialogue['sentence'], FILTER_VALIDATE_URL)) {
+            // Checkif valid file extensions
+            $ext = pathinfo($dialogue['sentence'], PATHINFO_EXTENSION);
+            switch($ext){
+                case 'jpg':
+                case 'png':
+                case 'gif':
+                    $link = $this->fn_valid_link($dialogue['sentence']);
+                    $context  = '<img src="'.$link.'" alt="Image" style="width:100%;height:100%;">';
+                break;
+                case 'mp3':
+                    $link = $this->fn_valid_link($dialogue['sentence']);
+                    $context   = '<audio controls style="width:100%;min-width:300px;">';
+                    $context  .= '<source src="'.$link.'" type="audio/mpeg">';
+                    $context  .= 'Your browser does not support the audio element.';
+                    $context  .= '</audio>';
+                break;
+                case '':
+                default:
+                    $link = $this->fn_valid_link($dialogue['sentence']);
+                    $context  = '<iframe frameborder="0" width="100%" height="90%" src="'.$link.'"></iframe>';
+                break;
+            }
+            $tempHtml .= '<p class="from-them disable-select" style="background-color:'.$chatColor.'!important;">'.$context.'</p>';
+        }else{
+            $sentence = $this->fn_filter($dialogue['sentence']);
+            $tempHtml .= '<p class="from-them disable-select" style="background-color:'.$chatColor.'!important;">'.$sentence.'</p>';
+        }
         $tempHtml .= '</div>';
         return $tempHtml;
     }
     private function role_rightSide($dialogue)
     {
-        $sentence  = $this->fn_filter($dialogue['sentence']);
+        // Normal
         $tempHtml  = '<div class="imessage">';
         if($this->currentCast !== $dialogue['name'])
         {
@@ -563,9 +629,52 @@ class ChatBlock
             }
             $tempHtml .= '</div>';
         }
-        $tempHtml .= '<p class="from-me">'.$sentence.'</p>';
+        // Checkif valid URL
+        if (filter_var($dialogue['sentence'], FILTER_VALIDATE_URL)) {
+            // Checkif valid file extensions
+            $ext = pathinfo($dialogue['sentence'], PATHINFO_EXTENSION);
+            switch($ext){
+                case 'jpg':
+                case 'png':
+                case 'gif':
+                    $link = $this->fn_valid_link($dialogue['sentence']);
+                    $context  = '<img src="'.$link.'" alt="Image" style="width:100%;height:100%;">';
+                break;
+                case 'mp3':
+                    $link = $this->fn_valid_link($dialogue['sentence']);
+                    $context   = '<audio controls style="width:100%;min-width:300px;">';
+                    $context  .= '<source src="'.$link.'" type="audio/mpeg">';
+                    $context  .= 'Your browser does not support the audio element.';
+                    $context  .= '</audio>';
+                break;
+                case '':
+                default:
+                    $link = $this->fn_valid_link($dialogue['sentence']);
+                    $context  = '<iframe frameborder="0" width="100%" height="90%" src="'.$link.'"></iframe>';
+                break;
+            }
+            // $this->settings->mainCastColor
+            $tempHtml .= '<p class="from-me disable-select" style="background-color:'.$this->settings->mainCastColor.'!important;">'.$context.'</p>';
+        }else{
+            $sentence = $this->fn_filter($dialogue['sentence']);
+            $tempHtml .= '<p class="from-me disable-select" style="background-color:'.$this->settings->mainCastColor.'!important;">'.$sentence.'</p>';
+        }
         $tempHtml .= '</div>';
         return $tempHtml;
+    }
+    private function loadCastColor($castName)
+    {
+        foreach($this->dialogue['casts'] as $cast)
+        {
+            if($cast['name'] == $castName)
+            {
+                if(isset($cast['color']))
+                {
+                    return $cast['color'];
+                }
+            }
+        }
+        return false; // If not match        
     }
     private function loadChatHeaderImg($castName)
     {
@@ -573,7 +682,10 @@ class ChatBlock
         {
             if($cast['name'] == $castName)
             {
-                return $cast['img'];
+                if(isset($cast['img']))
+                {
+                    return $cast['img'];
+                }
             }
         }
         return false; // If not match

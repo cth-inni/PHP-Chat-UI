@@ -1,5 +1,5 @@
 <?php
-require 'test.lib.php';
+// require 'test.lib.php';
 require 'vendor/autoload.php';
 use \TangHoong\ChatBlock\ChatBlock as ChatUI;
 ?>
@@ -70,6 +70,12 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
             case '107': 
                 $sample = file_get_contents('./sample/story.2.1.txt');
             break;
+            case 'youfeng': 
+                $sample = file_get_contents('./sample/youfeng.txt');
+            break;
+            case 'links': 
+                $sample = file_get_contents('./sample/links.txt');
+            break;
         }
         //
         // $cui = new ChatUI([
@@ -79,8 +85,8 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
         // start from here
         // $cui = new ChatUI();
         $cui = new ChatUI([
-            // 'allowForkScript' => 'https://chat-editor.tanghoong.com',  // default:null
-            'allowForkScript' => 'editor.php',  // default:null
+            'allowForkScript' => 'https://editor.chatnovel.app/',  // default:null
+            // 'allowForkScript' => 'editor.php',  // default:null
             'chatHeaderSize' => 'large' // default:normal,small,large
         ]);
         // echo '<pre>';
@@ -98,7 +104,10 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
         echo $cui->render();
 
         // Output for other format
-        // echo $cui->output();
+        // echo $cui->json();
+        // echo '<pre>';
+        // print_r($cui->dialogue);
+        // echo '</pre>';
         // ?>
         <style>
         .rawscript-chatblock-editor button{
