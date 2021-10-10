@@ -96,7 +96,10 @@ class ChatBlock
                         { // Lines that not match with standard, only work in single colon as index
                             if(!in_array($tempArray[0],$this->narratorList))
                             {
-                                array_push($chat['warnings'],$tempArray[0]);
+                                // array_push($chat['warnings'],$tempArray[0]);
+                                $tempLine['name']  = 'p';
+                                $tempLine['sentence']   = $tempArray[0];
+                                array_push($chat['lines'],$tempLine);
                             }
                         }
                     }// colon loop
@@ -423,10 +426,9 @@ class ChatBlock
     }
     private function render_rawdata_full($dialogue, $rawData)
     {
-        // $your_array = explode("\n", $rawData);
-        // $arr = explode("\n", $your_array);
+        $ts = time();
         $tempHtml  = '<div class="readingStory-changes well margin-top-2x padding-sm rawscript-chatblock-container">';
-        $tempHtml .= '<a class="btn btn-default btn-xs" data-toggle="collapse" data-target="#readingStory-changes-chatblock">显示原始对话剧本</a>';
+        $tempHtml .= '<a class="btn btn-default btn-xs" data-toggle="collapse" data-target="#readingStory-changes-chatblock-'.$ts.'">显示原始对话剧本</a>';
         if(isset($this->settings->allowForkScript))
         {
             $tempHtml .= '<div id="rawscript-chatblock-editor" class="rawscript-chatblock-editor">';
@@ -436,7 +438,7 @@ class ChatBlock
             $tempHtml .= '</div>';
             $tempHtml .= '</form>';
         }
-        $tempHtml .= '<pre id="readingStory-changes-chatblock" class="margin-top-lg collapse"><code>'.($rawData).'</code></pre>';
+        $tempHtml .= '<pre id="readingStory-changes-chatblock-'.$ts.'" class="margin-top-lg collapse"><code>'.($rawData).'</code></pre>';
         $tempHtml .= '</div>';
         return $tempHtml;
     }
@@ -456,14 +458,14 @@ class ChatBlock
     {
         $sentence  = $this->fn_filter($dialogue['sentence']);
         $tempHtml  = '<div class="imessage">';
-        $tempHtml .= '<p class="comment">'.$sentence.'</p>';
+        $tempHtml .= '<p class="comment-full">'.$sentence.'</p>';
         $tempHtml .= '</div>';
         return $tempHtml;
     }
     private function render_heading($dialogue)
     {
         $link = $this->fn_valid_link($dialogue['sentence']);
-        $tempHtml   = '<div class="imessage">';
+        $tempHtml   = '<div class="imessage text-center">';
         $tempHtml  .= '<'.strtolower($dialogue['name']).'>';
         $tempHtml  .= $dialogue['sentence'];
         $tempHtml  .= '</'.strtolower($dialogue['name']).'>';
@@ -689,6 +691,11 @@ class ChatBlock
             }
         }
         return false; // If not match
+    }
+    // https://stackoverflow.com/questions/18254566/file-get-contents-seems-to-add-extra-returns-to-the-data
+    private function convertEOL($string, $to = "\n")
+    {   
+        return preg_replace("/\r\n|\r|\n/", $to, $string);
     }
 } // EOF
 ?>

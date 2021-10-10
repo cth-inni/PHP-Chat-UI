@@ -7,7 +7,7 @@
 }
 
 .chatblock .imessage {
-    background-color: #fff;
+    /* background-color: #fff; */
     /* border: 1px solid #e5e5ea; */
     border-radius: 0.25rem;
     display: flex;
@@ -16,6 +16,7 @@
     font-size: inherit;
     margin: 0 auto;
     max-width: 600px;
+    /* padding: 0.5rem 1.5rem; */
   }
   
   .chatblock .imessage p {
@@ -44,6 +45,26 @@
     background-color: #666;
     color: #fff; 
   }
+/* 
+  .chatblock p.from-me {
+    background: linear-gradient(to bottom, #57B2FF, #0086F8);
+    box-shadow: 0px 5px 20px 1px;
+    position:relative;
+  }
+  
+  .chatblock p.from-me:after {
+    content:"";
+    display:block;
+    width:50%;
+    height:50%;
+    background: black;
+    position:absolute;
+    bottom:0px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:-1;
+    box-shadow: 0px 5px 80px 0px;
+  } */
   
   /* .chatblock p.from-me::before {
     border-bottom-left-radius: 0.8rem 0.7rem;
@@ -66,11 +87,13 @@
   }
   
   .chatblock p.from-me ~ p.from-me {
-    margin: 0.25rem 0 0;
+    /* margin: 0.25rem 0 0; */
+    margin: 0;
   }
   
   .chatblock p.from-me ~ p.from-me:not(:last-child) {
-    margin: 0.25rem 0 0;
+    /* margin: 0.25rem 0 0; */
+    margin: 0;
   }
   
   .chatblock p.from-me ~ p.from-me:last-child {
@@ -169,7 +192,12 @@
     width: 100%;
     padding: 0;
   }
-  
+
+  .chatblock .comment-full {
+    max-width: 100% !important;
+    width: 100%;
+  }
+
   @media screen and (max-width: 800px) {
   
     .chatblock .container {
@@ -180,7 +208,7 @@
       font-size: inherit;
       margin: 0 auto;
       max-width: 600px;
-      padding: 0.25rem 0.875rem;
+      padding: 0.15rem 0.875rem;
     }
   
     .chatblock .imessage p {
@@ -221,8 +249,17 @@
     text-align: left;
 }
 
-.chatblock .imessage .text-center{
+.chatblock .imessage .text-center,
+.chatblock .imessage h1,
+.chatblock .imessage h2,
+.chatblock .imessage h3,
+.chatblock .imessage h4,
+.chatblock .imessage h5,
+.chatblock .imessage h6
+{
   text-align: center;
+  margin: 0.5em;
+  color: #AAA;
 }
 
 .chatblock .imessage .text-bold{
