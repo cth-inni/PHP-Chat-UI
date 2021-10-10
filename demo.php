@@ -12,6 +12,16 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
         <title>Chatblock tutorial</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body{
+                margin: 0;
+                padding: 0;
+                background:#eee;
+            }
+            .chatblock {
+                padding: 20px;
+            }
+        </style>
     </head>
     <body>        
         <?php
@@ -75,6 +85,8 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
             break;
             case 'links': 
                 $sample = file_get_contents('./sample/links.txt');
+            case '108': 
+                $sample = file_get_contents('./sample/test.raw.2.txt');
             break;
         }
         //
