@@ -108,7 +108,7 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
         // $cui->setColon([':','：']);
         $cui->setColon(['：']);
         $cui->setNarrator(['Narrator','narrator','系统','旁白']);
-        $cui->setBreakPoint('_I_LOVE_EMANYAN_');
+        // $cui->setBreakPoint('_I_LOVE_EMANYAN_');
         echo sprintf('<style>%s</style>', $cui->renderCss());
         $cui->feed($sample);
         echo $cui->showWarnings();
