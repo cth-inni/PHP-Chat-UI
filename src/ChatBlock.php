@@ -27,8 +27,9 @@ class ChatBlock
             'image','imagecard','mp3','background','youtube','decision',
             'rawscript','rawscriptquote','codeblock','link',
             'narrator','profilecard',
+            '#','##','###','####','#####','######'
         ];
-        $this->colonList = [':','：'];
+        $this->colonList = ['_CODEDCOLON_'];
         $this->narratorList = ['Narrator','narrator','系统','旁白'];
         // default setting
         $oriObj = [
@@ -48,6 +49,7 @@ class ChatBlock
     }
     public function feed($rawData='')
     {
+        $rawData = str_replace(['：', ':'], $this->colonList, $rawData); // mass replace
         $this->rawData = $rawData;
         $chat['casts']       = [];
         $chat['lines']       = [];
@@ -256,6 +258,30 @@ class ChatBlock
         {
             switch($dialogue['name'])
             {
+                case '#': // 标题
+                    $this->currentCast = null;
+                    $tempHtml .= $this->md_render_heading($dialogue,1);
+                break;
+                case '##': // 副标题
+                    $this->currentCast = null;
+                    $tempHtml .= $this->md_render_heading($dialogue,2);
+                break;
+                case '###': // 旁白
+                    $this->currentCast = null;
+                    $tempHtml .= $this->md_render_heading($dialogue,3);
+                break;
+                case '####': // other purpose, keep
+                    $this->currentCast = null;
+                    $tempHtml .= $this->md_render_heading($dialogue,4);
+                break;
+                case '#####':  // other purpose, keep
+                    $this->currentCast = null;
+                    $tempHtml .= $this->md_render_heading($dialogue,5);
+                break;
+                case '######':  // other purpose, keep
+                    $this->currentCast = null;
+                    $tempHtml .= $this->md_render_heading($dialogue,6);
+                break;
                 case 'h1': 
                 case 'h2': 
                 case 'h3': 
@@ -268,6 +294,10 @@ class ChatBlock
                 case 'p': 
                     $this->currentCast = null;
                     $tempHtml .= $this->render_text($dialogue);
+                break;
+                case 'link': 
+                    $this->currentCast = null;
+                    $tempHtml .= $this->render_reflink($dialogue);
                 break;
                 case 'rawscriptquote': 
                     $this->currentCast = null;
@@ -454,6 +484,20 @@ class ChatBlock
         $tempHtml  = '<pre><code>'.$sentence.'</code></pre>';
         return $tempHtml;
     }
+    private function render_reflink($dialogue)
+    {
+        $sentence  = $this->fn_filter($dialogue['sentence']);
+        $tempArray = explode("@",$sentence);
+        $tempHtml  = '<div class="imessage">';
+        $tempHtml .= '<p class="narrator">';
+        $tempHtml .= '<img alt="svgImg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHg9IjBweCIgeT0iMHB4Igp3aWR0aD0iMjQiIGhlaWdodD0iMjQiCnZpZXdCb3g9IjAgMCAyNCAyNCIKc3R5bGU9IiBmaWxsOiMwMDAwMDA7Ij48cGF0aCBkPSJNIDUgMyBDIDMuOTA2OTM3MiAzIDMgMy45MDY5MzcyIDMgNSBMIDMgMTkgQyAzIDIwLjA5MzA2MyAzLjkwNjkzNzIgMjEgNSAyMSBMIDE5IDIxIEMgMjAuMDkzMDYzIDIxIDIxIDIwLjA5MzA2MyAyMSAxOSBMIDIxIDEyIEwgMTkgMTIgTCAxOSAxOSBMIDUgMTkgTCA1IDUgTCAxMiA1IEwgMTIgMyBMIDUgMyB6IE0gMTQgMyBMIDE0IDUgTCAxNy41ODU5MzggNSBMIDguMjkyOTY4OCAxNC4yOTI5NjkgTCA5LjcwNzAzMTIgMTUuNzA3MDMxIEwgMTkgNi40MTQwNjI1IEwgMTkgMTAgTCAyMSAxMCBMIDIxIDMgTCAxNCAzIHoiPjwvcGF0aD48L3N2Zz4="/>';
+        $tempHtml .= '<a href="'.$tempArray[1].'" target="_blank">';
+        $tempHtml .= '<b>'.$tempArray[0].'</b>';
+        $tempHtml .= '</a>';
+        $tempHtml .= '</p>';
+        $tempHtml .= '</div>';
+        return $tempHtml;
+    }
     private function render_text($dialogue)
     {
         $sentence  = $this->fn_filter($dialogue['sentence']);
@@ -469,6 +513,16 @@ class ChatBlock
         $tempHtml  .= '<'.strtolower($dialogue['name']).'>';
         $tempHtml  .= $dialogue['sentence'];
         $tempHtml  .= '</'.strtolower($dialogue['name']).'>';
+        $tempHtml  .= '</div>';
+        return $tempHtml;
+    }
+    private function md_render_heading($dialogue,$headingLevel)
+    {
+        $link = $this->fn_valid_link($dialogue['sentence']);
+        $tempHtml   = '<div class="imessage text-center">';
+        $tempHtml  .= '<h'.$headingLevel.'>';
+        $tempHtml  .= $dialogue['sentence'];
+        $tempHtml  .= '</h'.$headingLevel.'>';
         $tempHtml  .= '</div>';
         return $tempHtml;
     }

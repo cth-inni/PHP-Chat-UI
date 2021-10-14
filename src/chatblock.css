@@ -402,6 +402,6 @@
 }
 
 .rawscript-chatblock-container{
-  height: 30px;
+  /* height: 30px; */
   overflow: auto;
 }
