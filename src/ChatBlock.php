@@ -29,7 +29,8 @@ class ChatBlock
             'narrator','profilecard',
             '#','##','###','####','#####','######'
         ];
-        $this->colonList = ['_CODEDCOLON_'];
+        $this->colonList = ['：', ':'];
+        $this->codedColon = ['_CODEDCOLON_'];
         $this->narratorList = ['Narrator','narrator','系统','旁白'];
         // default setting
         $oriObj = [
@@ -49,7 +50,7 @@ class ChatBlock
     }
     public function feed($rawData='')
     {
-        $rawData = str_replace(['：', ':'], $this->colonList, $rawData); // mass replace
+        $rawData = str_replace($this->colonList, $this->codedColon, $rawData); // mass replace
         $this->rawData = $rawData;
         $chat['casts']       = [];
         $chat['lines']       = [];
@@ -82,7 +83,7 @@ class ChatBlock
                 if($lineVal != $this->SettingBreakPoint)
                 {
                     $tempLine = [];
-                    foreach($this->colonList as $colon)
+                    foreach($this->codedColon as $colon)
                     {
                         $tempArray = explode($colon,$lineVal);
                         if(
@@ -114,7 +115,7 @@ class ChatBlock
                 if($lineVal != $this->SettingBreakPoint)
                 {
                     $tempLine = [];
-                    foreach($this->colonList as $colon)
+                    foreach($this->codedColon as $colon)
                     {
                         $tempArray = explode($colon,$lineVal);
                         if(isset($tempArray) && count($tempArray) > 1)
