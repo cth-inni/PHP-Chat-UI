@@ -176,6 +176,12 @@ class ChatBlock
     /**
      * To allow using as Json format for frontend rendering
      */
+    public function rawdata(){
+        return $this->dialogue;
+    }
+    /**
+     * To allow using as Json format for frontend rendering
+     */
     public function json(){
         return json_encode($this->dialogue);
     }
@@ -346,7 +352,7 @@ class ChatBlock
                         $this->currentCast = null;
                         $tempHtml .= $this->role_narrator($dialogue);
                     }else{
-                        if( isset($this->rolesList[0]) && $this->rolesList[0] == $dialogue['name'])
+                        if( isset($this->dialogue['casts'][0]) && $this->dialogue['casts'][0]['name'] == $dialogue['name'])
                         { // maincast
                             $tempHtml .= $this->role_rightSide($dialogue);
                         }else{
