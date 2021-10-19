@@ -3,15 +3,13 @@
 require 'vendor/autoload.php';
 use \TangHoong\ChatBlock\ChatBlock as ChatUI;
 ?>
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
     <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
         <title>Chatblock tutorial</title>
         <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
             body{
                 margin: 0;
@@ -88,40 +86,30 @@ use \TangHoong\ChatBlock\ChatBlock as ChatUI;
             case '108': 
                 $sample = file_get_contents('./sample/test.raw.2.txt');
             break;
+            case 'report': 
+                $sample = file_get_contents('./sample/report.txt');
+            break;
         }
         //
-        // $cui = new ChatUI([
-        //     ....
-        // ]);
-        // $cui->setDefaultChatImgHeader('/img/path.ext');
         // start from here
         // $cui = new ChatUI();
         $cui = new ChatUI([
             'allowForkScript' => 'https://editor.chatnovel.app/',  // default:null
-            // 'allowForkScript' => 'editor.php',  // default:null
-            'chatHeaderSize' => 'large' // default:normal,small,large
+            'mainCastColor'  => '#198754',
+            'castColorMode'  => 'palette', // none, random, palette 
+            'chatHeaderSize' => 'large'  // default:normal ,small, large
         ]);
-        // echo '<pre>';
-        // var_dump($cui->settings->chatHeaderSize);
-        // die();
-        // Setting
-        // $cui->setColon([':','：']);
-        $cui->setColon(['：']);
+        // $cui->setColon([':']); // en, default
+        $cui->setColon(['：']); // zh
         $cui->setNarrator(['Narrator','narrator','系统','旁白']);
-        // $cui->setBreakPoint('_I_LOVE_EMANYAN_');
         echo sprintf('<style>%s</style>', $cui->renderCss());
         $cui->feed($sample);
-        echo $cui->showWarnings();
-        echo $cui->showCasts(); // For header introduction, header button
         echo $cui->render();
-
-        // Output for other format
-        // echo $cui->json();
-        // echo '<pre>';
-        // print_r($cui->dialogue);
-        // echo '</pre>';
-        // ?>
+        ?>
         <style>
+        /* .rawscript-chatblock-container{
+            height: 30px;
+        } */
         .rawscript-chatblock-editor button{
             display: block;  
         }
