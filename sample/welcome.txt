@@ -35,19 +35,18 @@ linebreak：
 旁白：文字版的表达方式之外，还有【图像、影像、声音】的使用方法，然后人们更加的融入故事剧情里的发展元素。比如：悬疑故事里的线索，沙雕日常的梗图，背景音乐等等。
 小编：来！先是图像版本的样本。记得在对话里前端加上一个【图像等于图像链接】
 小编：image=//images.unsplash.com/photo-1615419235091-59bf9cbd530b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=872&q=80
-showquote:35,35
+showquote:37,37
 小编：其他登场人物同样的使用方式。
 B号小编：image=//images.unsplash.com/photo-1615419235091-59bf9cbd530b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=872&q=80
 小编：然后中间大图。
-image：//images.unsplash.com/photo-1615419235091-59bf9cbd530b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=872&q=80
+image：//images.unsplash.com/photo-1534361960057-19889db9621e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=870&q=80
 linebreak:
 showquote:40,40
 小编：影片版本。注意如果发现影片如果没法在预览那边显现的话，那样很大的可能性是 Youtube 不准许有关影片被嵌入其他平台里面，因此还是建议找找没有版权限制的影片来源。
-showquote:45,45
-小编24：youtube=//www.youtube.com/watch?v=70hlqKynNrI
-小编：youtube=//www.youtube.com/watch?v=70hlqKynNrI
 showquote:48,48
-youtube：//www.youtube.com/watch?v=70hlqKynNrI
+小编24：youtube=p5aDuZRH6K0
+小编：youtube=p5aDuZRH6K0
+youtube：p5aDuZRH6K0
 ---：
 ###：四，进阶设定
 旁白：目前出来简单模式的写作方式之外，还提供了进阶设定方式入登场人物头像。基本上就是在所有的对白之后加上以下的字句。然后原本是对白里第一号人物是主角，但是因为【进阶设定】所以会把照清单里的第一名字化身为主角，你可以尝试把其他登场人物的行往上移动。

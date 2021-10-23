@@ -785,7 +785,7 @@ class ChatBlock
     {
         $link = $this->fn_valid_link($dialogue['_context']);
         $tempHtml   = '<div class="container-youtube">';
-        $tempHtml  .= '<iframe frameborder="0" width="100%" height="90%" src="'.$link.'"></iframe>';
+        $tempHtml  .= '<iframe frameborder="0" width="100%" height="90%" src="//www.youtube.com/embed/'.$link.'"></iframe>';
         $tempHtml  .= '</div>';
         return $tempHtml;
     }
@@ -897,7 +897,7 @@ class ChatBlock
                     $context  .= '</audio>';
                 break;
                 case 'youtube':
-                    $context  = '<iframe frameborder="0" width="100%" height="90%" src="'.$dataPath.'"></iframe>';
+                    $context  = '<iframe frameborder="0" width="100%" height="90%" src="//www.youtube.com/embed/'.$dataPath.'"></iframe>';
                 break;
             }
             $tempHtml .= '<p class="from-them disable-select" style="background-color:'.$chatColor.'!important;">'.$context.'</p>';
@@ -954,7 +954,7 @@ class ChatBlock
                     $context  .= '</audio>';
                 break;
                 case 'youtube':
-                    $context  = '<iframe frameborder="0" width="100%" height="90%" src="'.$dataPath.'"></iframe>';
+                    $context  = '<iframe frameborder="0" width="100%" height="90%" src="//www.youtube.com/embed/'.$dataPath.'"></iframe>';
                 break;
             }
             $tempHtml .= '<p class="from-me disable-select" style="background-color:'.$this->settings->mainCastColor.'!important;">'.$context.'</p>';
