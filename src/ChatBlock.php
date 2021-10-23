@@ -719,7 +719,8 @@ class ChatBlock
     }
     private function render_text($dialogue)
     {
-        $sentence  = $this->fn_filter($dialogue['_line']);
+        // $sentence  = $this->fn_filter($dialogue['_line']);
+        $sentence  = ($dialogue['_line']);
         $tempHtml  = '<div class="imessage">';
         $tempHtml .= '<p class="comment-full disable-select">'.$sentence.'</p>';
         $tempHtml .= '</div>';
