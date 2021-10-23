@@ -3,31 +3,36 @@ namespace TangHoong\ChatBlock;
 
 class ChatBlock
 {
-    public $rawData;
-    public $colonList;
-    public $narratorList;
-    public $rolesList;
-    public $colorsList;
     public $roles;
     public $lines;
-    public $dialogue;
     public $output;
+    public $rawData;
+    public $settings;
+    public $dialogue;
+    public $colonList;
+    public $emojiList;
+    public $rolesList;
+    public $colorsList;
+    public $currentCast;
+    public $narratorList;
     public $SettingBreakPoint;
     public $SettingWhitelistTag;
-    public $settings;
-    public $currentCast;
     function __construct($newObj=null)
     {
         // default
         $this->libpath   = 'https://github.com/tanghoong/phpchatblock/'; // use for checking
-        $this->version   = '0.2.32'; // Change before each commit
+        $this->version   = '0.2.33'; // Change before each commit
         $this->linebreak = '\r\n'; // Window, Linux
         // Settings
         $this->rawData = '';
         $this->currentCast = '';
-        $this->rolesList = [];
-        $this->SettingBreakPoint = "_ADVANCE_";
         $this->SettingCommand = "=";
+        $this->SettingBreakPoint = "_ADVANCE_";
+        $this->emojiList = [];
+        $this->rolesList = [];
+        $this->colonList = [':'];
+        $this->codedColon = ['_CODEDCOLON_'];
+        $this->narratorList = ['narrator'];
         $this->colorsList = [
             'a4dab7', '91d2a8', '8ec6a1', '8ec1a0', '8bbc9c', // a4dab7 Fox Color Palette
             'a2c4c9', '8eabaf', '94a5a7', '899ea1', '869799', // Good Friend Tweetle Color Palette
@@ -44,9 +49,6 @@ class ChatBlock
         $this->SettingBlacklistTag = [
             'rawscript','rawquote', // retired tags
         ];
-        $this->colonList = [':'];
-        $this->codedColon = ['_CODEDCOLON_'];
-        $this->narratorList = ['Narrator','narrator','系统','旁白'];
         // default setting
         $oriObj = [
             'allowForkScript'   => null,
@@ -63,177 +65,6 @@ class ChatBlock
         }
         // merged setting
         $this->settings = (object)$defObj;
-    }
-    public function feed($rawData='')
-    {
-        $rawData = str_replace($this->colonList, $this->codedColon, $rawData); // mass replace
-        $this->rawData = $rawData;
-        $chat['scenes']      = [];
-        $chat['casts']       = [];
-        $chat['lines']       = [];
-        $chat['warnings']    = [];
-        $rolesData = strstr($rawData, $this->SettingBreakPoint);
-        $linesData = strstr($rawData, $this->SettingBreakPoint, true);
-        if($rolesData != false)
-        { // structure roles, Settings
-            $rolesArray = array_values(array_filter(explode(PHP_EOL,$rolesData)));
-            foreach($rolesArray as $roleKey => $roleVal)
-            {
-                // Settings
-                if(preg_match('/'.$this->SettingCommand.'/i',$roleVal)) {
-                    $tempScenes = [];
-                    $dataPath = strstr($roleVal, $this->SettingCommand);
-                    $dataPath = ltrim($dataPath, $this->SettingCommand);
-                    $ext = strstr($roleVal, $this->SettingCommand, true);
-                    $tempScenes[$ext] = $dataPath;
-                    // $tempArray = explode($this->SettingCommand,$roleVal);
-                    // if(isset($tempArray) && count($tempArray) > 1)
-                    // {
-                    // array_push($chat['scenes'],$tempScenes);
-                    // }
-                }
-                // Roles
-                if(preg_match('/@/i',$roleVal)) {
-                    $tempCast = [];
-                    $tempArray = explode("@",$roleVal);
-                    if(isset($tempArray) && count($tempArray) > 1)
-                    {
-                        list($name, $img)  = $tempArray;
-                        $tempCast['name']  = $name;
-                        $tempCast['img']   = $img;
-                        switch($this->settings->castColorMode)
-                        {
-                            case 'random':
-                                $tempCast['color']   = $this->randomColor($this->settings->castsColorsRange);
-                            break;
-                            case 'palette':
-                                $tempCast['color']   = $this->paletteColor();
-                            break;
-                            case 'none':
-                                $tempCast['color']   = '#cccccc';
-                            break;
-                        }
-                        array_push($chat['casts'],$tempCast);
-                        array_push($this->rolesList,$name);
-                        array_push($this->SettingWhitelistTag,$name);
-                    }
-                }
-                // End
-            }
-        }
-        if($linesData != false)
-        { // structure lines // reading image header settings, render with name + image
-            $linesArray = array_values(array_filter(explode(PHP_EOL,$linesData)));
-            foreach($linesArray as $lineKey => $lineVal)
-            {
-                if($lineVal != $this->SettingBreakPoint)
-                {
-                    $tempLine = [];
-                    foreach($this->codedColon as $colon)
-                    {
-                        $tempArray = explode($colon,$lineVal);
-                        if(
-                            isset($tempArray) && count($tempArray) > 1 
-                            && (in_array($tempArray[0],$this->SettingWhitelistTag) || in_array($tempArray[0],$this->narratorList))
-                        )
-                        { // whitelisted
-                            list($name, $sentence) = $tempArray;
-                            $tempLine['name']  = $name;
-                            $tempLine['sentence']   = $sentence;
-                            array_push($chat['lines'],$tempLine);
-                        }else
-                        { // Lines that not match with standard, only work in single colon as index
-                            if(!in_array($tempArray[0],$this->narratorList))
-                            {
-                                // array_push($chat['warnings'],$tempArray[0]);
-                                $tempLine['name']  = 'p';
-                                $tempLine['sentence']   = $tempArray[0];
-                                array_push($chat['lines'],$tempLine);
-                            }
-                        }
-                    }// colon loop
-                }
-            }
-        }else{ // structure lines // Without those image header settings, allow them to render by name only
-            $linesArray = array_values(array_filter(explode(PHP_EOL,$rawData)));
-            foreach($linesArray as $lineKey => $lineVal)
-            {
-                if($lineVal != $this->SettingBreakPoint)
-                {
-                    $tempLine = [];
-                    foreach($this->codedColon as $colon)
-                    {
-                        $tempArray = explode($colon,$lineVal);
-                        if(isset($tempArray) && count($tempArray) > 1)
-                        { // whitelisted
-                            list($name, $sentence) = $tempArray;
-                            $tempLine['name']  = $name;
-                            $tempLine['sentence']   = $sentence;
-                            array_push($chat['lines'],$tempLine);
-
-                            if(!in_array($name,$this->narratorList))
-                            { // Exclude narrator
-                                array_push($this->rolesList,$name); // first line name as main cast
-                                array_unique($this->rolesList);
-                            }
-                        }else
-                        { // Lines that not match with standard, only work in single colon as index
-                            if(!in_array($tempArray[0],$this->narratorList))
-                            {
-                                // array_push($chat['warnings'],$tempArray[0]);
-                                $tempLine['name']  = 'p';
-                                $tempLine['sentence']   = $tempArray[0];
-                                array_push($chat['lines'],$tempLine);
-                            }
-                        }
-                    }
-                }
-            }
-            $tempRoles = array_diff($this->rolesList, $this->SettingWhitelistTag);
-            $tempRoles = array_values(array_unique($tempRoles));
-            foreach($tempRoles as $tempRolesKey)
-            {
-                $tempCast = [];
-                $tempCast['name']    = $tempRolesKey;
-                $tempCast['img']     = null;
-                switch($this->settings->castColorMode)
-                {
-                    case 'random':
-                        $tempCast['color']   = $this->randomColor($this->settings->castsColorsRange);
-                    break;
-                    case 'palette':
-                        $tempCast['color']   = $this->paletteColor();
-                    break;
-                    case 'none':
-                        $tempCast['color']   = '#cccccc';
-                    break;
-                }
-                array_push($chat['casts'], $tempCast);
-            }
-        }
-        $this->dialogue = $chat;
-    }
-    public function paletteColor ()
-    {
-        $color = array_shift($this->colorsList);
-        return '#'.$color;
-    }
-    public function randomColor ($rangeVal = '0,255')
-    {
-        $minMaxVal = explode(',',$rangeVal);
-        $minVal = $minMaxVal[0];
-        $maxVal = $minMaxVal[1];
-        // Make sure the parameters will result in valid colours
-        $minVal = $minVal < 0 || $minVal > 255 ? 0 : $minVal;
-        $maxVal = $maxVal < 0 || $maxVal > 255 ? 255 : $maxVal;
-    
-        // Generate 3 values
-        $r = mt_rand($minVal, $maxVal);
-        $g = mt_rand($minVal, $maxVal);
-        $b = mt_rand($minVal, $maxVal);
-    
-        // Return a hex colour ID string
-        return sprintf('#%02X%02X%02X', $r, $g, $b);
     }
     /**
      * To allow using as Json format for frontend rendering
@@ -252,6 +83,12 @@ class ChatBlock
      */
     public function setColon($colonArray = []){
         $this->colonList = $colonArray;
+    }
+    /**
+     * Set Emoji
+     */
+    public function setEmoji($emojiArray = []){
+        $this->emojiList = $emojiArray;
     }
     /**
      * Set Narrator
@@ -278,6 +115,34 @@ class ChatBlock
         return $this->output;
     }
     /**
+     * Color selection
+     */
+    public function paletteColor ()
+    {
+        $color = array_shift($this->colorsList);
+        return '#'.$color;
+    }
+    /**
+     * Random Color selection
+     */
+    public function randomColor ($rangeVal = '0,255')
+    {
+        $minMaxVal = explode(',',$rangeVal);
+        $minVal = $minMaxVal[0];
+        $maxVal = $minMaxVal[1];
+        // Make sure the parameters will result in valid colours
+        $minVal = $minVal < 0 || $minVal > 255 ? 0 : $minVal;
+        $maxVal = $maxVal < 0 || $maxVal > 255 ? 255 : $maxVal;
+    
+        // Generate 3 values
+        $r = mt_rand($minVal, $maxVal);
+        $g = mt_rand($minVal, $maxVal);
+        $b = mt_rand($minVal, $maxVal);
+    
+        // Return a hex colour ID string
+        return sprintf('#%02X%02X%02X', $r, $g, $b);
+    }
+    /**
      * Show error message
      */
     public function showWarnings(){
@@ -297,29 +162,268 @@ class ChatBlock
         $tempHtml .= '<div class="imessage casts-list" style="margin:0 !important;">';
         foreach($this->dialogue['casts'] as $cast)
         {
-            $tempHtml .= '<div class="chat-name">';
-            if($this->loadChatHeaderImg($cast['name']) !== false)
-            {
-                switch($this->settings->chatHeaderSize)
-                {
-                    default:
-                    case 'small':
-                        $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($cast['name']).'">';
-                    break;
-                    case 'normal':
-                        $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($cast['name']).'">';
-                    break;
-                    case 'large':
-                        $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($cast['name']).'">';
-                    break;
-                }
-            }
-            $tempHtml .= trim($cast['name']).'</div>';
+            $chatColor = $this->loadCastColor($cast['name']);
+            $tempHtml .= '<div class="cast">';
+            $tempHtml .= '<div class="square disable-select" style="border-color:'.$chatColor.';background:#38A899 url('.$this->loadChatHeaderImg($cast['name']).')center center/60px 60px no-repeat;">'.trim($cast['name']).'</div>';
+            $tempHtml .= '</div>';
         }
         $tempHtml .= '</div>';
         $tempHtml .= '</div>';
         return $tempHtml;
     }
+
+    public function feed($rawData='')
+    {
+        $this->rawData = $rawData;
+        $chat['warnings']    = [];
+        $chat['settings']    = [];
+        $chat['scenes']      = [];
+        $chat['casts']       = [];
+        $chat['lines']       = [];
+
+        try {
+            $chat['settings'] = $this->_buildSettingsFeed($rawData);
+            $chat['lines']    = $this->_buildLinesFeed($rawData);     // Always must first run
+            $chat['casts']    = $this->_buildCastsFeed($rawData);
+            $chat['scenes']   = $this->_buildSceneFeed($rawData);
+        }
+        catch(Exception $e) {
+            $chat['warnings']    = $e->getMessage();
+        }
+        $this->dialogue = $chat;
+    }
+    private function _buildSettingsFeed($rawData) {
+        $proceedData = [];
+        $linesData = strstr($rawData, $this->SettingBreakPoint, true);
+        $rolesData = strstr($rawData, $this->SettingBreakPoint);
+        if($rolesData !== false && $linesData !== false)
+        { // Advance mode
+            $rolesArray = array_values(array_filter(explode(PHP_EOL,$rolesData)));
+            foreach($rolesArray as $roleKey => $roleVal)
+            {
+                if(preg_match('/settings=\{[^}]+\}/i',$roleVal))
+                { // Matched settings={JSONstring}
+                    $tempScenes = [];
+                    $tempData = strstr($roleVal, $this->SettingCommand);
+                    $tempData = ltrim($tempData, $this->SettingCommand);
+                    $meta = strstr($roleVal, $this->SettingCommand, true);
+                    $proceedData = json_decode($tempData,true);
+                }
+            }
+        }
+        return $proceedData;
+    }
+    private function _buildSceneFeed($rawData) {
+        $proceedData = [];
+        $linesData = strstr($rawData, $this->SettingBreakPoint, true);
+        $rolesData = strstr($rawData, $this->SettingBreakPoint);
+        if($rolesData !== false && $linesData !== false)
+        { // Advance mode
+            $rolesArray = array_values(array_filter(explode(PHP_EOL,$rolesData)));
+            foreach($rolesArray as $roleKey => $roleVal)
+            {
+                if(preg_match('/scene+\-+[0-9]{1,3}=\{[^}]+\}/i',$roleVal))
+                { // Matched scene-[1-999]={JSONstring}
+                    $tempScenes = [];
+                    $tempData = strstr($roleVal, $this->SettingCommand);
+                    $tempData = ltrim($tempData, $this->SettingCommand);
+                    $meta = strstr($roleVal, $this->SettingCommand, true);
+                    $proceedData[$meta] = json_decode($tempData,true);
+                }
+            }
+        }
+        return $proceedData;
+    }
+    private function _buildCastsFeed($rawData) {
+        $proceedData = [];
+        array_unique($this->rolesList); // Unique cast list
+        $linesData = strstr($rawData, $this->SettingBreakPoint, true);
+        $rolesData = strstr($rawData, $this->SettingBreakPoint);
+        $tempRoles = array_diff($this->rolesList, $this->SettingWhitelistTag);
+        $tempRoles = array_values(array_unique($tempRoles));
+        foreach($tempRoles as $tempRolesKey)
+        {
+            $tempCast = [];
+            $tempCast['name']    = $tempRolesKey;
+            $tempCast['color']     = null;
+            $tempCast['img']     = null;
+            switch($this->settings->castColorMode)
+            {
+                case 'random':
+                    $tempCast['color']   = $this->randomColor($this->settings->castsColorsRange);
+                break;
+                case 'palette':
+                    $tempCast['color']   = $this->paletteColor();
+                break;
+                case 'none':
+                    $tempCast['color']   = '#cccccc';
+                break;
+            }
+            array_push($proceedData, $tempCast);
+        }
+        if($rolesData !== false && $linesData !== false)
+        { // Advance mode
+            $castIndexCounter = 0;
+            $rolesArray = array_values(array_filter(explode(PHP_EOL,$rolesData)));
+            foreach($rolesArray as $roleKey => $roleVal)
+            {
+                // Advance Settings
+                if(preg_match('/@/i',$roleVal))
+                { // match name@meta_data
+                    $tempCast = [];
+                    $tempArray = explode("@",$roleVal);
+                    if(isset($tempArray) && count($tempArray) > 1)
+                    {
+                        list($name, $img)  = $tempArray;
+                        foreach($proceedData as $castKey => $castData)
+                        {
+                            if(isset($castData['name']) && $castData['name'] == $name)
+                            {
+                                if($castIndexCounter == 0)
+                                { // Shift to first as main cast
+                                    $newCastdata = [];
+                                    $newCastdata['name']  = $name;
+                                    $newCastdata['color'] = $proceedData[$castKey]['color'];
+                                    $newCastdata['img']   = $img;
+                                    unset($proceedData[$castKey]);
+                                    array_unshift($proceedData,$newCastdata);
+                                }else
+                                { // Update img only
+                                    $proceedData[$castKey]['img'] = $img;
+                                }
+                            }
+                        }
+                        $castIndexCounter++; // Only apply to first cast setting
+                    }
+                }
+                // End
+            }
+        }
+        return $proceedData;
+    }
+    private function _buildLinesFeed($rawData) {
+        $proceedData = [];
+        $linesArray = array_values(array_filter(explode(PHP_EOL,$rawData))); // string to array
+        foreach($linesArray as $lineKey => $lineVal)
+        {
+            if($lineVal != $this->SettingBreakPoint)
+            {
+                $tempLine = [];
+                $tempLine['_type']     = null;
+                $tempLine['_line']     = null;
+                $tempLine['_castname'] = null;
+                $tempLine['_context']  = null;
+                $tempLine['emojis']    = [];
+                $detectFlag = false;
+                $tempLine['_line']   = $lineVal;
+                foreach($this->colonList as $tempColon)
+                {
+                    if( $detectFlag == false )
+                    {
+                        $castname = strstr($lineVal, $tempColon, true);
+                        $content  = ltrim(strstr($lineVal, $tempColon), $tempColon);
+                        $checkValid = substr($castname, 0, 2); // Comment script to ignore
+                        if(!in_array($castname,$this->SettingBlacklistTag) && $checkValid != '//')
+                        {
+                            if($castname == false && $content == false)
+                            {
+                                $tempLine['_type']  = 'line';
+                            }else
+                            { // 
+                                $tempLine['_type']  = 'talk';
+                                $tempLine['_castname']   = $castname;
+                                $newLine = $this->replaceEmojiTexttoImage($content);
+                                $tempLine['emojis']     = $newLine['emojis'];
+                                $tempLine['_context']   = $newLine['_context'];
+                                if(!$this->in_arrayi($castname,$this->narratorList))
+                                { // Exclude narrator
+                                    array_push($this->rolesList,$castname); // Build Cast list
+                                }
+                                $detectFlag = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                array_push($proceedData,$tempLine);
+            }else
+            { // Quit if hit $this->SettingBreakPoint
+                break;
+            }
+        }
+        return $proceedData;
+    }
+    private function in_arrayi($needle, $haystack)
+    {
+        return in_array(strtolower($needle), array_map('strtolower', $haystack));
+    }
+    private function _mergeRecursively($obj1, $obj2) {
+        if (is_object($obj2)) {
+            $keys = array_keys(get_object_vars($obj2));
+            foreach ($keys as $key) {
+                if (
+                    isset($obj1->{$key})
+                    && is_object($obj1->{$key})
+                    && is_object($obj2->{$key})
+                ) {
+                    $obj1->{$key} = $this->_mergeRecursively($obj1->{$key}, $obj2->{$key});
+                } elseif (isset($obj1->{$key})
+                && is_array($obj1->{$key})
+                && is_array($obj2->{$key})) {
+                    $obj1->{$key} = $this->_mergeRecursively($obj1->{$key}, $obj2->{$key});
+                } else {
+                    $obj1->{$key} = $obj2->{$key};
+                }
+            }
+        } elseif (is_array($obj2)) {
+            if (
+                is_array($obj1)
+                && is_array($obj2)
+            ) {
+                $obj1 = array_merge_recursive($obj1, $obj2);
+            } else {
+                $obj1 = $obj2;
+            }
+        }
+
+        return $obj1;
+    }
+    private function replaceEmojiTexttoImage($source='') {
+        $tempEmoji = [];
+        $newTarget = $source;
+        // Emoji replace - start
+        preg_match_all("/\:([^:]*)\:/", $source, $tempMatchedEmojiArray); // All matched emoji to Array
+        $tempMatchedEmojiArray   = array_unique(array_merge(...array_values($tempMatchedEmojiArray))); // emoji Array flatten
+        foreach($tempMatchedEmojiArray as $emoji)
+        {
+            if(preg_match("/\:([^:]*)\:/", $emoji))
+            { // only valid emoji value
+                array_push($tempEmoji, $emoji);
+            }
+        }
+        if(count($tempEmoji) > 0)
+        { // If emoji detected
+            foreach($tempEmoji as $emoji)
+            {
+                $selectedEmoji = trim($emoji,':');
+                if(isset($this->emojiList[$selectedEmoji]))
+                { // If exist in source's list
+                    $selectedEmoji = '<img src="'.$this->emojiList[$selectedEmoji].'" />';
+                }
+                $newTarget = preg_replace('/'.$emoji.'/', $selectedEmoji, $newTarget);
+            }
+        }
+        // Emoji replace - end
+        return [
+            'emojis'   => $tempEmoji,
+            '_context' => $newTarget
+        ];
+    }
+
+
+
+
+
     /**
      * Using default html rendered chat blocks
      */
@@ -332,7 +436,7 @@ class ChatBlock
         // }
         foreach($this->dialogue['lines'] as $dialogue)
         {
-            switch($dialogue['name'])
+            switch($dialogue['_castname'])
             {
                 case '#': // h1
                     $this->currentCast = null;
@@ -418,22 +522,24 @@ class ChatBlock
                 break;
                 case 'devtools': 
                     $this->currentCast = null;
-                    $tempHtml .= $this->renderDev($dialogue,$dialogue['sentence']);
+                    $tempHtml .= $this->renderDev($dialogue,$dialogue['_line']);
                 break;
                 default: 
-                    if(in_array($dialogue['name'],$this->narratorList))
+                    if(in_array($dialogue['_castname'],$this->narratorList))
                     { // Custom narrator
                         $this->currentCast = null;
                         $tempHtml .= $this->role_narrator($dialogue);
                     }else{
-                        if( isset($this->dialogue['casts'][0]) && $this->dialogue['casts'][0]['name'] == $dialogue['name'])
+                        if(isset($this->dialogue['casts'][0]) && $this->dialogue['casts'][0]['name'] == $dialogue['_castname'])
                         { // maincast
                             $tempHtml .= $this->role_rightSide($dialogue);
-                        }else{ // others
-                            $checkValid = substr($dialogue['name'], 0, 2); // Comment script to ignore
-                            if(!in_array($dialogue['name'],$this->SettingBlacklistTag) && $checkValid != '//')
-                            {// Exclude blacklisted tag
+                        }else{
+                            if(!is_null($dialogue['_context']))
+                            { // others cast
                                 $tempHtml .= $this->role_leftSide($dialogue);
+                            }else
+                            { // Normal text
+                                $tempHtml .= $this->render_text($dialogue);
                             }
                         }
                     }
@@ -442,12 +548,7 @@ class ChatBlock
         }
         $tempHtml .= '</section>';
         $tempHtml .= '</div>';
-        $tempHtml .= '<hr/>';
         $tempHtml .= $this->render_rawdata_full(null,$this->rawData);
-        $tempHtml .= '<hr/>';
-        $tempHtml .= '<hr/>';
-        
-
         return $tempHtml;
     }
     private function renderDev($dialogue=null,$option='')
@@ -500,43 +601,6 @@ class ChatBlock
         // echo $this->dynamicCss();
         return ob_get_clean();
     }
-    /**
-     * Recursively merges two objects and returns a resulting object.
-     * @param object $obj1 The base object
-     * @param object $obj2 The merge object
-     * @return object The merged object
-     */
-    private function _mergeRecursively($obj1, $obj2) {
-        if (is_object($obj2)) {
-            $keys = array_keys(get_object_vars($obj2));
-            foreach ($keys as $key) {
-                if (
-                    isset($obj1->{$key})
-                    && is_object($obj1->{$key})
-                    && is_object($obj2->{$key})
-                ) {
-                    $obj1->{$key} = $this->_mergeRecursively($obj1->{$key}, $obj2->{$key});
-                } elseif (isset($obj1->{$key})
-                && is_array($obj1->{$key})
-                && is_array($obj2->{$key})) {
-                    $obj1->{$key} = $this->_mergeRecursively($obj1->{$key}, $obj2->{$key});
-                } else {
-                    $obj1->{$key} = $obj2->{$key};
-                }
-            }
-        } elseif (is_array($obj2)) {
-            if (
-                is_array($obj1)
-                && is_array($obj2)
-            ) {
-                $obj1 = array_merge_recursive($obj1, $obj2);
-            } else {
-                $obj1 = $obj2;
-            }
-        }
-
-        return $obj1;
-    }
     // Dynamic
     private function dynamicCss()
     {
@@ -547,7 +611,7 @@ class ChatBlock
     // Multimedia
     private function render_imagecard_holder($dialogue)
     {
-        $link = $this->fn_valid_link($dialogue['sentence']);
+        $link = $this->fn_valid_link($dialogue['_context']);
         $url_components = parse_url($link);
         parse_str($url_components['query'], $params);
         $title = (isset($params['title'])?str_replace('+',' ',$params['title']):null);
@@ -576,24 +640,29 @@ class ChatBlock
     {
         $tempLine  = '';
         $tempArray = [];
-        if(isset($dialogue['sentence']) && $dialogue['sentence'] == '--show-data')
+        if(isset($dialogue['_line']) && $dialogue['_line'] == '--show-data')
         { // Show all
             $minMaxVal = null;
             $minVal = 0; 
             $maxVal = 100; 
             $tempHtml  = '<pre><code>'.($rawData).'</code></pre>';
         }else{ // Show range
-            $minMaxVal = explode(',',$dialogue['sentence']);
+            $getLineNo = strstr($dialogue['_line'], ':');
+            $getLineNo = ltrim($getLineNo, ':');
+            $minMaxVal = explode(',',$getLineNo);
             $maxVal = ($minMaxVal[1] < $minMaxVal[0])? 100: $minMaxVal[1];
             $minVal = ($minMaxVal[0] < 0)? 0: $minMaxVal[0];
             $arrData = $this->dialogue['lines'];
             for($i = $minVal-1; $i < $maxVal; $i++)
             {
-                array_push($tempArray, ($i+1).' '.$arrData[$i]['name'].$this->colonList[0].$arrData[$i]['sentence']);
+                if(isset($arrData[$i]))
+                {
+                    array_push($tempArray, ($i+1).' '.$arrData[$i]['_line']);
+                }
             }
-            $tempLine = array_values($tempArray);
-            $tempLine = implode('<br/>',array_values($tempArray));
-            $tempHtml  = '<pre><code>'.nl2br($tempLine).'</code></pre>';
+            $tempArray = array_values($tempArray);
+            $tempArray = implode('<br/>',array_values($tempArray));
+            $tempHtml  = '<pre><code>'.nl2br($tempArray).'</code></pre>';
         }
         return $tempHtml;
     }
@@ -601,6 +670,7 @@ class ChatBlock
     {
         $ts = time();
         $tempHtml  = '<div class="readingStory-changes well margin-top-2x padding-sm rawscript-chatblock-container">';
+        $tempHtml .= '<hr/>';
         $tempHtml .= '<a class="btn btn-default btn-xs" data-toggle="collapse" data-target="#readingStory-changes-chatblock-'.$ts.'">显示原始对话剧本</a>';
         if(isset($this->settings->allowForkScript))
         {
@@ -629,14 +699,13 @@ class ChatBlock
     }
     private function render_codeblock($dialogue)
     {
-        $sentence  = $this->fn_filter($dialogue['sentence']);
-        // $sentence  = ($dialogue['sentence']);
+        $sentence  = ($dialogue['_line']);
         $tempHtml  = '<pre><code>'.$sentence.'</code></pre>';
         return $tempHtml;
     }
     private function render_reflink($dialogue)
     {
-        $sentence  = $this->fn_filter($dialogue['sentence']);
+        $sentence  = ($dialogue['_context']);
         $tempArray = explode($this->SettingCommand,$sentence);
         $tempHtml  = '<div class="imessage">';
         $tempHtml .= '<p class="narrator">';
@@ -650,27 +719,28 @@ class ChatBlock
     }
     private function render_text($dialogue)
     {
-        $sentence  = $this->fn_filter($dialogue['sentence']);
+        $sentence  = $this->fn_filter($dialogue['_line']);
         $tempHtml  = '<div class="imessage">';
-        $tempHtml .= '<p class="comment-full">'.$sentence.'</p>';
+        $tempHtml .= '<p class="comment-full disable-select">'.$sentence.'</p>';
         $tempHtml .= '</div>';
         return $tempHtml;
     }
     private function render_heading($dialogue)
     {
-        $link = $this->fn_valid_link($dialogue['sentence']);
+        $link = $this->fn_valid_link($dialogue['_line']);
         $tempHtml   = '<div class="imessage text-center">';
-        $tempHtml  .= '<'.strtolower($dialogue['name']).'>';
-        $tempHtml  .= $dialogue['sentence'];
-        $tempHtml  .= '</'.strtolower($dialogue['name']).'>';
+        $tempHtml  .= '<'.strtolower($dialogue['_castname']).'>';
+        $tempHtml  .= $dialogue['_line'];
+        $tempHtml  .= '</'.strtolower($dialogue['_castname']).'>';
         $tempHtml  .= '</div>';
         return $tempHtml;
     }
     private function md_render_heading($dialogue,$headingLevel)
     {
+        $sentence  = ($dialogue['_context']);
         $tempHtml   = '<div class="imessage text-center">';
         $tempHtml  .= '<h'.$headingLevel.'>';
-        $tempHtml  .= $dialogue['sentence'];
+        $tempHtml  .= $sentence;
         $tempHtml  .= '</h'.$headingLevel.'>';
         $tempHtml  .= '</div>';
         return $tempHtml;
@@ -679,9 +749,9 @@ class ChatBlock
     {
         $tempHtml  = '</section>';
         $tempHtml .= '<hr/>';
-        if(isset($dialogue['sentence']) && $dialogue['sentence'] != '')
+        if(isset($dialogue['_context']) && $dialogue['_context'] != '')
         {
-            $tempHtml  .= $dialogue['sentence'];
+            $tempHtml  .= $dialogue['_context'];
             $tempHtml .= '<hr/>';
         }
         $tempHtml .= '<section class="vf-80">';
@@ -689,7 +759,7 @@ class ChatBlock
     }
     private function render_image_holder($dialogue)
     {
-        $link = $this->fn_valid_link($dialogue['sentence']);
+        $link = $this->fn_valid_link($dialogue['_context']);
         $tempHtml   = '<div class="container-image">';
         $tempHtml  .= '<img src="'.$link.'" alt="Image" style="width:100%;height:100%;">';
         $tempHtml  .= '</div>';
@@ -697,13 +767,13 @@ class ChatBlock
     }
     private function render_sound_holder($dialogue)
     {
-        $link = $this->fn_valid_link($dialogue['sentence']);
+        $link = $this->fn_valid_link($dialogue['_context']);
         $tempHtml   = '<div class="container-mp3">';
         $tempHtml  .= '<audio controls loop style="width:100%;">';
         $tempHtml  .= '<source src="'.$link.'" type="audio/mpeg">';
         $tempHtml  .= 'Your browser does not support the audio element.';
         $tempHtml  .= '</audio>';
-        if($dialogue['name'] == 'Background')
+        if($dialogue['_castname'] == 'Background')
         {
         $tempHtml  .= '<div class="text-muted text-bold text-center">背景循环音乐</div>';
         }
@@ -712,7 +782,7 @@ class ChatBlock
     }
     private function render_video_holder($dialogue)
     {
-        $link = $this->fn_valid_link($dialogue['sentence']);
+        $link = $this->fn_valid_link($dialogue['_context']);
         $tempHtml   = '<div class="container-youtube">';
         $tempHtml  .= '<iframe frameborder="0" width="100%" height="90%" src="'.$link.'"></iframe>';
         $tempHtml  .= '</div>';
@@ -720,7 +790,7 @@ class ChatBlock
     }
     private function render_decisions_holder($dialogue)
     {
-        $paramItems = explode('=',$dialogue['sentence']);
+        $paramItems = explode('=',$dialogue['_context']);
         $optionList = explode(',',$paramItems[1]);
         $tempHtml   = '<p class="text-center comment">'.$paramItems[0].'</p>';
         $tempHtml  .= '<div class="container-decision">';
@@ -734,7 +804,30 @@ class ChatBlock
     // Misc
     private function fn_filter($dialogue)
     {
-        $newStr = strip_tags($dialogue,"<b><i><u>"); // Allow to bold, italic, underline
+        $newStr = strip_tags($dialogue); // Strip all tag
+        // Bold, Italic, Code, Delete - start
+        $regex = '([*-_`])((?:(?!\1).)+)\1';
+        preg_match_all("~$regex~", $newStr, $matches, PREG_SET_ORDER);
+        foreach($matches as $set)
+        {
+            if($set[1] == '`') $tag = 'code';
+            elseif($set[1] == '*') $tag = 'b';
+            elseif($set[1] == '-') $tag = 'del';
+            else $tag = 'em';
+            $newStr = str_replace($set[0], "<$tag>{$set[2]}</$tag>", $newStr);
+        }
+        // Bold, Italic, Code, Delete - end
+        // @,# - start
+        $regex = '([@#])((?:(?!\1).)+)\s';
+        preg_match_all("~$regex~", $newStr, $matches2, PREG_SET_ORDER);
+        foreach($matches2 as $set2)
+        {
+            if($set2[1] == '@') $tag = 'cast';
+            elseif($set2[1] == '#') $tag = 'topic';
+
+            $newStr = str_replace($set2[0], "<span class=\"chat-label chat-label-{$tag}\">{$set2[2]}</span>&nbsp;", $newStr);
+        }
+        // @,# - end
         $newStr = str_replace($this->linebreak,'<br/>',$newStr); // Allow to multiples lines
         return trim($newStr);
     }
@@ -750,9 +843,9 @@ class ChatBlock
     // Chat Blocks
     private function role_narrator($dialogue)
     {
-        $sentence  = $this->fn_filter($dialogue['sentence']);
+        $sentence  = $this->fn_filter($dialogue['_context']);
         $tempHtml  = '<div class="imessage">';
-        $tempHtml .= '<p class="narrator">'.$sentence.'</p>';
+        $tempHtml .= '<p class="narrator disable-select">'.$sentence.'</p>';
         $tempHtml .= '</div>';
         return $tempHtml;
     }
@@ -760,37 +853,37 @@ class ChatBlock
     {
         // Normal
         $tempHtml  = '<div class="imessage">';
-        $chatColor = $this->loadCastColor($dialogue['name']);
-        if($this->currentCast !== $dialogue['name'])
+        $chatColor = $this->loadCastColor($dialogue['_castname']);
+        if($this->currentCast !== $dialogue['_castname'])
         {
-            $this->currentCast = $dialogue['name'];
+            $this->currentCast = $dialogue['_castname'];
             $tempHtml .= '<div class="chat-name chat-name-them">';
-            $chatHeaderImg = $this->loadChatHeaderImg($dialogue['name']);
+            $chatHeaderImg = $this->loadChatHeaderImg($dialogue['_castname']);
             if($chatHeaderImg == false)
             {
-                $tempHtml .= '<b style="color:'.$chatColor.'!important;">'.trim($dialogue['name']).'</b>';
+                $tempHtml .= '<b style="color:'.$chatColor.'!important;">'.trim($dialogue['_castname']).'</b>';
             }else{
                 switch($this->settings->chatHeaderSize)
                 {
                     default:
                     case 'small':
-                        $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.'<b style="color:'.$chatColor.'!important;">'.trim($dialogue['name']).'</b>';
+                        $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$chatColor.'!important;">'.trim($dialogue['_castname']).'</b>';
                     break;
                     case 'normal':
-                        $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.'<b style="color:'.$chatColor.'!important;">'.trim($dialogue['name']).'</b>';
+                        $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$chatColor.'!important;">'.trim($dialogue['_castname']).'</b>';
                     break;
                     case 'large':
-                        $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.'<b style="color:'.$chatColor.'!important;">'.trim($dialogue['name']).'</b>';
+                        $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$chatColor.'!important;">'.trim($dialogue['_castname']).'</b>';
                     break;
                 }
             }
             $tempHtml .= '</div>';
         }
         // 
-        if(preg_match('/'.$this->SettingCommand.'/i',$dialogue['sentence'])) {
-            $dataPath = strstr($dialogue['sentence'], $this->SettingCommand);
+        if(preg_match('/'.$this->SettingCommand.'/i',$dialogue['_context'])) {
+            $dataPath = strstr($dialogue['_context'], $this->SettingCommand);
             $dataPath = ltrim($dataPath, $this->SettingCommand);
-            $ext = strstr($dialogue['sentence'], $this->SettingCommand, true);
+            $ext = strstr($dialogue['_context'], $this->SettingCommand, true);
             $context  = '';
             switch($ext){
                 case 'image':
@@ -808,7 +901,7 @@ class ChatBlock
             }
             $tempHtml .= '<p class="from-them disable-select" style="background-color:'.$chatColor.'!important;">'.$context.'</p>';
         }else{
-            $sentence = $this->fn_filter($dialogue['sentence']);
+            $sentence = $this->fn_filter($dialogue['_context']);
             $tempHtml .= '<p class="from-them disable-select" style="background-color:'.$chatColor.'!important;">'.$sentence.'</p>';
         }
         $tempHtml .= '</div>';
@@ -818,36 +911,36 @@ class ChatBlock
     {
         // Normal
         $tempHtml  = '<div class="imessage">';
-        if($this->currentCast !== $dialogue['name'])
+        if($this->currentCast !== $dialogue['_castname'])
         {
-            $this->currentCast = $dialogue['name'];
+            $this->currentCast = $dialogue['_castname'];
             $tempHtml .= '<div class="chat-name chat-name-me">';
-            $chatHeaderImg = $this->loadChatHeaderImg($dialogue['name']);
+            $chatHeaderImg = $this->loadChatHeaderImg($dialogue['_castname']);
             if($chatHeaderImg == false)
             {
-                $tempHtml .= '<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['name']).'</b>';
+                $tempHtml .= '<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['_castname']).'</b>';
             }else{
                 switch($this->settings->chatHeaderSize)
                 {
                     default:
                     case 'small':
-                        $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.'<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['name']).'</b>';
+                        $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['_castname']).'</b>';
                     break;
                     case 'normal':
-                        $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.'<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['name']).'</b>';
+                        $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['_castname']).'</b>';
                     break;
                     case 'large':
-                        $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['name']).'">'.'<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['name']).'</b>';
+                        $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['_castname']).'</b>';
                     break;
                 }
             }
             $tempHtml .= '</div>';
         }
         //
-        if(preg_match('/'.$this->SettingCommand.'/i',$dialogue['sentence'])) {
-            $dataPath = strstr($dialogue['sentence'], $this->SettingCommand);
+        if(preg_match('/'.$this->SettingCommand.'/i',$dialogue['_context'])) {
+            $dataPath = strstr($dialogue['_context'], $this->SettingCommand);
             $dataPath = ltrim($dataPath, $this->SettingCommand);
-            $ext = strstr($dialogue['sentence'], $this->SettingCommand, true);
+            $ext = strstr($dialogue['_context'], $this->SettingCommand, true);
             $context  = '';
             switch($ext){
                 case 'image':
@@ -865,7 +958,7 @@ class ChatBlock
             }
             $tempHtml .= '<p class="from-me disable-select" style="background-color:'.$this->settings->mainCastColor.'!important;">'.$context.'</p>';
         }else{
-            $sentence = $this->fn_filter($dialogue['sentence']);
+            $sentence = $this->fn_filter($dialogue['_context']);
             $tempHtml .= '<p class="from-me disable-select" style="background-color:'.$this->settings->mainCastColor.'!important;">'.$sentence.'</p>';
         }
         $tempHtml .= '</div>';
@@ -903,6 +996,18 @@ class ChatBlock
     private function convertEOL($string, $to = "\n")
     {   
         return preg_replace("/\r\n|\r|\n/", $to, $string);
+    }
+    public function starttime() {
+        $r = explode( ' ', microtime() );
+        $r = $r[1] + $r[0];
+        return $r;
+    }
+        
+    public function endtime($starttime) {
+        $r = explode( ' ', microtime() );
+        $r = $r[1] + $r[0];
+        $r = round($r - $starttime,4);
+        return '<strong>Execution Time</strong>: '.$r.' seconds&nbsp;&nbsp;<br />';
     }
 } // EOF
 ?>
