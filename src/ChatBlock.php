@@ -163,7 +163,7 @@ class ChatBlock
         foreach($this->dialogue['casts'] as $cast)
         {
             $chatColor = $this->loadCastColor($cast['name']);
-            $tempHtml .= '<div class="cast">';
+            $tempHtml .= '<div class="cast btnGotoHead" data-castid="'.$cast['castId'].'">';
             $tempHtml .= '<div class="square disable-select" style="border-color:'.$chatColor.';background:#38A899 url('.$this->loadChatHeaderImg($cast['name']).')center center/60px 60px no-repeat;">'.trim($cast['name']).'</div>';
             $tempHtml .= '</div>';
         }
@@ -245,7 +245,8 @@ class ChatBlock
         {
             $tempCast = [];
             $tempCast['name']    = $tempRolesKey;
-            $tempCast['color']     = null;
+            $tempCast['castId']  = uniqid();
+            $tempCast['color']   = null;
             $tempCast['img']     = null;
             switch($this->settings->castColorMode)
             {
@@ -532,11 +533,14 @@ class ChatBlock
                     }else{
                         if(isset($this->dialogue['casts'][0]) && $this->dialogue['casts'][0]['name'] == $dialogue['_castname'])
                         { // maincast
-                            $tempHtml .= $this->role_rightSide($dialogue);
+                            // $tempHtml .= $this->role_rightSide($dialogue);
+                            $tempHtml .= $this->renderRoleSide($dialogue,'right',$this->settings->mainCastColor);
                         }else{
                             if(!is_null($dialogue['_context']))
                             { // others cast
-                                $tempHtml .= $this->role_leftSide($dialogue);
+                                // $tempHtml .= $this->role_leftSide($dialogue);
+                                // $chatColor = $this->loadCastColor($dialogue['_castname']);
+                                $tempHtml .= $this->renderRoleSide($dialogue,'left',$this->loadCastColor($dialogue['_castname']));
                             }else
                             { // Normal text
                                 $tempHtml .= $this->render_text($dialogue);
@@ -850,88 +854,37 @@ class ChatBlock
         $tempHtml .= '</div>';
         return $tempHtml;
     }
-    private function role_leftSide($dialogue)
+    // New role side (left|right) - start
+    private function renderRoleSide($dialogue,$direction='left',$color='#CCC')
     {
-        // Normal
-        $tempHtml  = '<div class="imessage">';
-        $chatColor = $this->loadCastColor($dialogue['_castname']);
-        if($this->currentCast !== $dialogue['_castname'])
+        if($direction == 'left')
         {
-            $this->currentCast = $dialogue['_castname'];
-            $tempHtml .= '<div class="chat-name chat-name-them">';
-            $chatHeaderImg = $this->loadChatHeaderImg($dialogue['_castname']);
-            if($chatHeaderImg == false)
-            {
-                $tempHtml .= '<b style="color:'.$chatColor.'!important;">'.trim($dialogue['_castname']).'</b>';
-            }else{
-                switch($this->settings->chatHeaderSize)
-                {
-                    default:
-                    case 'small':
-                        $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$chatColor.'!important;">'.trim($dialogue['_castname']).'</b>';
-                    break;
-                    case 'normal':
-                        $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$chatColor.'!important;">'.trim($dialogue['_castname']).'</b>';
-                    break;
-                    case 'large':
-                        $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$chatColor.'!important;">'.trim($dialogue['_castname']).'</b>';
-                    break;
-                }
-            }
-            $tempHtml .= '</div>';
-        }
-        // 
-        if(preg_match('/'.$this->SettingCommand.'/i',$dialogue['_context'])) {
-            $dataPath = strstr($dialogue['_context'], $this->SettingCommand);
-            $dataPath = ltrim($dataPath, $this->SettingCommand);
-            $ext = strstr($dialogue['_context'], $this->SettingCommand, true);
-            $context  = '';
-            switch($ext){
-                case 'image':
-                    $context  = '<img src="'.$dataPath.'" alt="Image" style="width:100%;height:100%;">';
-                break;
-                case 'mp3':
-                    $context   = '<audio controls style="width:100%;min-width:300px;">';
-                    $context  .= '<source src="'.$dataPath.'" type="audio/mpeg">';
-                    $context  .= 'Your browser does not support the audio element.';
-                    $context  .= '</audio>';
-                break;
-                case 'youtube':
-                    $context  = '<iframe frameborder="0" width="100%" height="90%" src="//www.youtube.com/embed/'.$dataPath.'"></iframe>';
-                break;
-            }
-            $tempHtml .= '<p class="from-them disable-select" style="background-color:'.$chatColor.'!important;">'.$context.'</p>';
+            $classDirection = 'them';
         }else{
-            $sentence = $this->fn_filter($dialogue['_context']);
-            $tempHtml .= '<p class="from-them disable-select" style="background-color:'.$chatColor.'!important;">'.$sentence.'</p>';
+            $classDirection = 'me';
         }
-        $tempHtml .= '</div>';
-        return $tempHtml;
-    }
-    private function role_rightSide($dialogue)
-    {
         // Normal
         $tempHtml  = '<div class="imessage">';
         if($this->currentCast !== $dialogue['_castname'])
         {
             $this->currentCast = $dialogue['_castname'];
-            $tempHtml .= '<div class="chat-name chat-name-me">';
+            $tempHtml .= '<div class="chat-name chat-name-'.$classDirection.'">';
             $chatHeaderImg = $this->loadChatHeaderImg($dialogue['_castname']);
             if($chatHeaderImg == false)
             {
-                $tempHtml .= '<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['_castname']).'</b>';
+                $tempHtml .= '<b style="color:'.$color.'!important;">'.trim($dialogue['_castname']).'</b>';
             }else{
                 switch($this->settings->chatHeaderSize)
                 {
                     default:
                     case 'small':
-                        $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['_castname']).'</b>';
+                        $tempHtml .= '<img class="chat-header-s" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$color.'!important;">'.trim($dialogue['_castname']).'</b>';
                     break;
                     case 'normal':
-                        $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['_castname']).'</b>';
+                        $tempHtml .= '<img class="chat-header" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$color.'!important;">'.trim($dialogue['_castname']).'</b>';
                     break;
                     case 'large':
-                        $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$this->settings->mainCastColor.'!important;">'.trim($dialogue['_castname']).'</b>';
+                        $tempHtml .= '<img class="chat-header-xl" src="'.$this->loadChatHeaderImg($dialogue['_castname']).'">'.'<b style="color:'.$color.'!important;">'.trim($dialogue['_castname']).'</b>';
                     break;
                 }
             }
@@ -957,14 +910,15 @@ class ChatBlock
                     $context  = '<iframe frameborder="0" width="100%" height="90%" src="//www.youtube.com/embed/'.$dataPath.'"></iframe>';
                 break;
             }
-            $tempHtml .= '<p class="from-me disable-select" style="background-color:'.$this->settings->mainCastColor.'!important;">'.$context.'</p>';
+            $tempHtml .= '<p class="from-'.$classDirection.' disable-select" style="background-color:'.$color.'!important;">'.$context.'</p>';
         }else{
             $sentence = $this->fn_filter($dialogue['_context']);
-            $tempHtml .= '<p class="from-me disable-select" style="background-color:'.$this->settings->mainCastColor.'!important;">'.$sentence.'</p>';
+            $tempHtml .= '<p class="from-'.$classDirection.' disable-select" style="background-color:'.$color.'!important;">'.$sentence.'</p>';
         }
         $tempHtml .= '</div>';
         return $tempHtml;
     }
+    // New role side (left|right) - end
     private function loadCastColor($castName)
     {
         foreach($this->dialogue['casts'] as $cast)

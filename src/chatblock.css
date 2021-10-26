@@ -383,8 +383,8 @@
 
 .chatblock .casts-list{
   display: flex;
-  flex-wrap: wrap;
   flex-direction: row;
+  /* flex-wrap: wrap; */
 }
 
 .chatblock .casts-list .cast{
@@ -392,7 +392,7 @@
 }
 
 .chatblock .casts-list .cast .square{
-  opacity: 0.7;
+  /* opacity: 0.7; */
   cursor: pointer;
   color: #FFF;
   text-shadow: 2px 2px #000;
@@ -403,6 +403,9 @@
   width: 66px;
   height:0;
   padding-bottom:60px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .chatblock .casts-list .cast .square:hover{
   opacity: 1;
