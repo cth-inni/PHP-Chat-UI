@@ -21,15 +21,20 @@
   
   .chatblock .imessage p {
     border-radius: 1.15rem;
-    line-height: 1.75;
+    line-height: 2;
     max-width: 75%;
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
     position: relative;
     word-wrap: break-word;
+    text-align: justify;
   }
 
   .chatblock .imessage p img {
     border-radius: 1rem;
+  }
+  
+  .chatblock .imessage p img.emoji-icon {
+    max-width: 2rem;
   }
   
   .chatblock .imessage p::before,
@@ -251,6 +256,8 @@
 
 .chatblock .imessage .chat-label{
   font-weight: bold;
+  text-decoration: underline;
+  margin: 0px 4px;
 }
 
 .chatblock .imessage .text-center,

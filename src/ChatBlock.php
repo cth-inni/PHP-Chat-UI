@@ -412,7 +412,7 @@ class ChatBlock
                 $selectedEmoji = trim($emoji,':');
                 if(isset($this->emojiList[$selectedEmoji]))
                 { // If exist in source's list
-                    $selectedEmoji = '<img src="'.$this->emojiList[$selectedEmoji].'" />';
+                    $selectedEmoji = '<img class="emoji-icon" alt="'.$selectedEmoji.'" src="'.$this->emojiList[$selectedEmoji].'" />';
                 }
                 $newTarget = preg_replace('/'.$emoji.'/', $selectedEmoji, $newTarget);
             }
@@ -536,13 +536,10 @@ class ChatBlock
                     }else{
                         if(isset($this->dialogue['casts'][0]) && $this->dialogue['casts'][0]['name'] == $dialogue['_castname'])
                         { // maincast
-                            // $tempHtml .= $this->role_rightSide($dialogue);
                             $tempHtml .= $this->renderRoleSide($dialogue,'right',$this->settings->mainCastColor);
                         }else{
                             if(!is_null($dialogue['_context']))
                             { // others cast
-                                // $tempHtml .= $this->role_leftSide($dialogue);
-                                // $chatColor = $this->loadCastColor($dialogue['_castname']);
                                 $tempHtml .= $this->renderRoleSide($dialogue,'left',$this->loadCastColor($dialogue['_castname']));
                             }else
                             { // Normal text
@@ -819,6 +816,7 @@ class ChatBlock
     // Misc
     private function fn_stripTags($dialogue)
     {
+        // return ($dialogue); // Strip all tag
         return strip_tags($dialogue); // Strip all tag
     }
     private function fn_filter($dialogue)
@@ -832,10 +830,10 @@ class ChatBlock
             switch($set[1])
             {
                 case '`': $tag = 'code'; break;
-                case '*': $tag = 'b';    break;
                 case '-': $tag = 'del';  break;
-                case '_': $tag = 'em'; break;
-                default:  $tag = null; break;
+                case '_': $tag = 'em';   break;
+                case '*': $tag = 'b';    break;
+                default:  $tag = null;   break;
             }
             if(!is_null($tag))
             {
@@ -844,25 +842,21 @@ class ChatBlock
         }
         // Bold, Italic, Code, Delete - end
         // @,# - start
-        // $regex = '([\@\#])((?:(?!\1).)+)\s';
-        // $regex = '[\#|\@][^$]';
-        // $regex = '(^|\s)[\#\@](\w*[a-zA-Z_]+\w*)';
-        // $regex = '([\#\@]\w*)';
-        // preg_match_all("~$regex~", $newStr, $matches2, PREG_SET_ORDER);
-        // foreach($matches2 as $set2)
-        // {
-        // print_r($set2);
-        //     switch($set[1])
-        //     {
-        //         case '@': $tag = 'cast'; break;
-        //         case '#': $tag = 'topic';    break;
-        //         default:  $tag = null; break;
-        //     }
-        //     if(!is_null($tag))
-        //     {
-        //         $newStr = str_replace($set2[0], "<span class=\"chat-label chat-label-{$tag}\">{$set2[2]}</span>&nbsp;", $newStr);
-        //     }
-        // }
+        $regex = '([\@\#])((?:\S(?!\S\1))+)'; // start with @ or #, end with whitespace, no whitespace in between
+        preg_match_all("~$regex~", $newStr, $matches2, PREG_SET_ORDER);
+        foreach($matches2 as $set2)
+        {
+            switch($set2[1])
+            {
+                case '@': $tag = 'cast';  break;
+                case '#': $tag = 'topic'; break;
+                default:  $tag = null;    break;
+            }
+            if(!is_null($tag))
+            {
+                $newStr = str_replace($set2[0], "<span class=\"chat-label chat-label-{$tag}\">{$set2[2]}</span>", $newStr);
+            }
+        }
         // @,# - end
         $newStr = str_replace($this->linebreak,'<br/>',$newStr); // Allow to multiples lines
         return trim($newStr);
@@ -944,6 +938,9 @@ class ChatBlock
                 break;
                 case 'youtube':
                     $context  = '<iframe frameborder="0" width="100%" height="90%" src="//www.youtube.com/embed/'.$dataPath.'"></iframe>';
+                break;
+                default:
+                    $context = ($dialogue['_context']);
                 break;
             }
             $tempHtml .= '<p class="from-'.$classDirection.' disable-select" style="background-color:'.$color.'!important;">'.$context.'</p>';
