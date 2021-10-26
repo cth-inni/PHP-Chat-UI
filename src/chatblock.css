@@ -383,8 +383,8 @@
 
 .chatblock .casts-list{
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
-  /* flex-wrap: wrap; */
 }
 
 .chatblock .casts-list .cast{
@@ -392,7 +392,7 @@
 }
 
 .chatblock .casts-list .cast .square{
-  /* opacity: 0.7; */
+  opacity: 0.7;
   cursor: pointer;
   color: #FFF;
   text-shadow: 2px 2px #000;
@@ -430,10 +430,6 @@
   right: 10px;
 }
 
-.chatblock .rawscript-chatblock-editor textarea{
-  display: none;
-}
-
 .chatblock .rawscript-chatblock-container{
   overflow: auto;
 }
@@ -442,7 +438,9 @@
   min-height: 80vh;
 }
 
+.chatblock .d-none,
 .chatblock .rawscript-chatblock-container,
-.chatblock .rawscript-chatblock-editor button{
+.chatblock .rawscript-chatblock-editor textarea,
+.chatblock .rawscript-chatblock-editor button {
     display: none;
 }

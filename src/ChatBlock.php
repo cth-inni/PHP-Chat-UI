@@ -51,6 +51,7 @@ class ChatBlock
         ];
         // default setting
         $oriObj = [
+            'devTools'          => false,
             'allowForkScript'   => null,
             'chatHeaderSize'    => 'normal',
             'mainCastColor'     => '#248bf5',
@@ -164,7 +165,7 @@ class ChatBlock
         {
             $chatColor = $this->loadCastColor($cast['name']);
             $tempHtml .= '<div class="cast btnGotoHead" data-castid="'.$cast['castId'].'">';
-            $tempHtml .= '<div class="square disable-select" style="border-color:'.$chatColor.';background:#38A899 url('.$this->loadChatHeaderImg($cast['name']).')center center/60px 60px no-repeat;">'.trim($cast['name']).'</div>';
+            $tempHtml .= '<div class="square disable-select" style="border-color:'.$chatColor.';background:#38A899 url('.$this->loadChatHeaderImg($cast['name']).')center center/60px 60px no-repeat;" role="text" aria-label="'.trim($cast['name']).'" alt="'.trim($cast['name']).'">'.trim($cast['name']).'</div>';
             $tempHtml .= '</div>';
         }
         $tempHtml .= '</div>';
@@ -246,7 +247,7 @@ class ChatBlock
             $tempCast = [];
             $tempCast['name']    = $tempRolesKey;
             $tempCast['castId']  = uniqid();
-            $tempCast['color']   = null;
+            $tempCast['color']     = null;
             $tempCast['img']     = null;
             switch($this->settings->castColorMode)
             {
@@ -284,6 +285,7 @@ class ChatBlock
                                 { // Shift to first as main cast
                                     $newCastdata = [];
                                     $newCastdata['name']  = $name;
+                                    $newCastdata['castId']= uniqid();
                                     $newCastdata['color'] = $proceedData[$castKey]['color'];
                                     $newCastdata['img']   = $img;
                                     unset($proceedData[$castKey]);
@@ -552,7 +554,10 @@ class ChatBlock
         }
         $tempHtml .= '</section>';
         $tempHtml .= '</div>';
-        $tempHtml .= $this->render_rawdata_full(null,$this->rawData);
+        if($this->settings->devTools)
+        {
+            $tempHtml .= $this->render_rawdata_full(null,$this->rawData);
+        }
         return $tempHtml;
     }
     private function renderDev($dialogue=null,$option='')
@@ -673,15 +678,15 @@ class ChatBlock
     private function render_rawdata_full($dialogue, $rawData)
     {
         $ts = time();
-        $tempHtml  = '<div class="readingStory-changes well margin-top-2x padding-sm rawscript-chatblock-container">';
+        $tempHtml  = '<div id="chatblock-devtools" class="readingStory-changes well margin-top-2x padding-sm rawscript-chatblock-container">';
         $tempHtml .= '<hr/>';
-        $tempHtml .= '<a class="btn btn-default btn-xs" data-toggle="collapse" data-target="#readingStory-changes-chatblock-'.$ts.'">显示原始对话剧本</a>';
+        $tempHtml .= '<a class="btn btn-default btn-xs" data-toggle="collapse" data-target="#readingStory-changes-chatblock-'.$ts.'">Toggle Devtools</a>';
         if(isset($this->settings->allowForkScript))
         {
             $tempHtml .= '<div id="rawscript-chatblock-editor" class="rawscript-chatblock-editor">';
             $tempHtml .= '<form method="POST" target="_blank" action="'.$this->settings->allowForkScript.'">';
-            $tempHtml .= '<button type="submit" class="btn btn-default btn-xs">玩玩本章对话剧本</button><br/>';
-            $tempHtml .= '<textarea name="rawscript">'.$rawData.'</textarea>';
+            $tempHtml .= '<button type="submit" class="btn btn-default btn-xs">Debug Scripts</button><br/>';
+            $tempHtml .= '<textarea class="d-none" name="rawscript">'.$rawData.'</textarea>';
             $tempHtml .= '</div>';
             $tempHtml .= '</form>';
         }
@@ -723,8 +728,7 @@ class ChatBlock
     }
     private function render_text($dialogue)
     {
-        // $sentence  = $this->fn_filter($dialogue['_line']);
-        $sentence  = ($dialogue['_line']);
+        $sentence  = $this->fn_stripTags($dialogue['_context']);
         $tempHtml  = '<div class="imessage">';
         $tempHtml .= '<p class="comment-full disable-select">'.$sentence.'</p>';
         $tempHtml .= '</div>';
@@ -732,17 +736,17 @@ class ChatBlock
     }
     private function render_heading($dialogue)
     {
-        $link = $this->fn_valid_link($dialogue['_line']);
+        $sentence  = $this->fn_stripTags($dialogue['_context']);
         $tempHtml   = '<div class="imessage text-center">';
         $tempHtml  .= '<'.strtolower($dialogue['_castname']).'>';
-        $tempHtml  .= $dialogue['_line'];
+        $tempHtml  .= $sentence;
         $tempHtml  .= '</'.strtolower($dialogue['_castname']).'>';
         $tempHtml  .= '</div>';
         return $tempHtml;
     }
     private function md_render_heading($dialogue,$headingLevel)
     {
-        $sentence  = ($dialogue['_context']);
+        $sentence  = $this->fn_stripTags($dialogue['_context']);
         $tempHtml   = '<div class="imessage text-center">';
         $tempHtml  .= '<h'.$headingLevel.'>';
         $tempHtml  .= $sentence;
@@ -807,6 +811,10 @@ class ChatBlock
         return $tempHtml;
     }
     // Misc
+    private function fn_stripTags($dialogue)
+    {
+        return strip_tags($dialogue); // Strip all tag
+    }
     private function fn_filter($dialogue)
     {
         $newStr = strip_tags($dialogue); // Strip all tag
@@ -815,23 +823,40 @@ class ChatBlock
         preg_match_all("~$regex~", $newStr, $matches, PREG_SET_ORDER);
         foreach($matches as $set)
         {
-            if($set[1] == '`') $tag = 'code';
-            elseif($set[1] == '*') $tag = 'b';
-            elseif($set[1] == '-') $tag = 'del';
-            else $tag = 'em';
-            $newStr = str_replace($set[0], "<$tag>{$set[2]}</$tag>", $newStr);
+            switch($set[1])
+            {
+                case '`': $tag = 'code'; break;
+                case '*': $tag = 'b';    break;
+                case '-': $tag = 'del';  break;
+                case '_': $tag = 'em'; break;
+                default:  $tag = null; break;
+            }
+            if(!is_null($tag))
+            {
+                $newStr = str_replace($set[0], "<$tag>{$set[2]}</$tag>", $newStr);
+            }
         }
         // Bold, Italic, Code, Delete - end
         // @,# - start
-        $regex = '([@#])((?:(?!\1).)+)\s';
-        preg_match_all("~$regex~", $newStr, $matches2, PREG_SET_ORDER);
-        foreach($matches2 as $set2)
-        {
-            if($set2[1] == '@') $tag = 'cast';
-            elseif($set2[1] == '#') $tag = 'topic';
-
-            $newStr = str_replace($set2[0], "<span class=\"chat-label chat-label-{$tag}\">{$set2[2]}</span>&nbsp;", $newStr);
-        }
+        // $regex = '([\@\#])((?:(?!\1).)+)\s';
+        // $regex = '[\#|\@][^$]';
+        // $regex = '(^|\s)[\#\@](\w*[a-zA-Z_]+\w*)';
+        // $regex = '([\#\@]\w*)';
+        // preg_match_all("~$regex~", $newStr, $matches2, PREG_SET_ORDER);
+        // foreach($matches2 as $set2)
+        // {
+        // print_r($set2);
+        //     switch($set[1])
+        //     {
+        //         case '@': $tag = 'cast'; break;
+        //         case '#': $tag = 'topic';    break;
+        //         default:  $tag = null; break;
+        //     }
+        //     if(!is_null($tag))
+        //     {
+        //         $newStr = str_replace($set2[0], "<span class=\"chat-label chat-label-{$tag}\">{$set2[2]}</span>&nbsp;", $newStr);
+        //     }
+        // }
         // @,# - end
         $newStr = str_replace($this->linebreak,'<br/>',$newStr); // Allow to multiples lines
         return trim($newStr);
@@ -848,7 +873,7 @@ class ChatBlock
     // Chat Blocks
     private function role_narrator($dialogue)
     {
-        $sentence  = $this->fn_filter($dialogue['_context']);
+        $sentence  = $this->fn_stripTags($dialogue['_context']);
         $tempHtml  = '<div class="imessage">';
         $tempHtml .= '<p class="narrator disable-select">'.$sentence.'</p>';
         $tempHtml .= '</div>';
