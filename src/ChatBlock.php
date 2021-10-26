@@ -53,6 +53,7 @@ class ChatBlock
         $oriObj = [
             'devTools'          => false,
             'allowForkScript'   => null,
+            'extraImageClass'   => null,
             'chatHeaderSize'    => 'normal',
             'mainCastColor'     => '#248bf5',
             'castColorMode'     => 'none', // none, random, palette (15 colors)
@@ -770,7 +771,12 @@ class ChatBlock
     {
         $link = $this->fn_valid_link($dialogue['_context']);
         $tempHtml   = '<div class="container-image">';
-        $tempHtml  .= '<img src="'.$link.'" alt="Image" style="width:100%;height:100%;">';
+        $extraClass = '';
+        if($this->settings->extraImageClass)
+        {
+            $extraClass = $this->settings->extraImageClass;
+        }
+        $tempHtml  .= '<img src="'.$link.'" class="'.$extraClass.'" alt="Image" style="width:100%;height:100%;">';
         $tempHtml  .= '</div>';
         return $tempHtml;
     }
@@ -923,7 +929,12 @@ class ChatBlock
             $context  = '';
             switch($ext){
                 case 'image':
-                    $context  = '<img src="'.$dataPath.'" alt="Image" style="width:100%;height:100%;">';
+                    $extraClass = '';
+                    if($this->settings->extraImageClass)
+                    {
+                        $extraClass = $this->settings->extraImageClass;
+                    }
+                    $context  = '<img src="'.$dataPath.'" class="'.$extraClass.'" alt="Image" style="width:100%;height:100%;">';
                 break;
                 case 'mp3':
                     $context   = '<audio controls style="width:100%;min-width:300px;">';
