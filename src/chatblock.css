@@ -445,9 +445,8 @@
   min-height: 80vh;
 }
 
-.chatblock .d-none,
-.chatblock .rawscript-chatblock-container,
-.chatblock .rawscript-chatblock-editor textarea,
-.chatblock .rawscript-chatblock-editor button {
+#chatblock-devtools,
+#chatblock-devtools pre,
+#chatblock-devtools .d-none {
     display: none;
 }

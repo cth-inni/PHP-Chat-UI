@@ -485,7 +485,7 @@ class ChatBlock
                 break;
                 case 'p': 
                     $this->currentCast = null;
-                    $tempHtml .= $this->render_text($dialogue);
+                    $tempHtml .= $this->render_text($dialogue,'p');
                 break;
                 case 'link': 
                     $this->currentCast = null;
@@ -543,7 +543,7 @@ class ChatBlock
                                 $tempHtml .= $this->renderRoleSide($dialogue,'left',$this->loadCastColor($dialogue['_castname']));
                             }else
                             { // Normal text
-                                $tempHtml .= $this->render_text($dialogue);
+                                $tempHtml .= $this->render_text($dialogue,'sentence');
                             }
                         }
                     }
@@ -570,8 +570,7 @@ class ChatBlock
                 }
             break;
             case '--info':
-                $tempHtml  .= '<pre><code>';
-                // $tempHtml  .= '<p><b>Version</b><br/><a href="'.$this->libpath.'releases/tag/'.$this->version.'" target="_blank">'.$this->version.'</a></p>';
+                $tempHtml  .= '<pre><code id="devShowInfo">';
                 $tempHtml  .= '<p><b>Version</b><br/>'.$this->version.'</p>';
                 $tempHtml  .= '<p><b>Breakpoint</b><br/>'.$this->SettingBreakPoint.'</p>';
                 $tempHtml  .= '<p><b>Colon list</b><br/>'.implode(',',$this->colonList).'</p>';
@@ -583,12 +582,12 @@ class ChatBlock
                 $tempHtml  .= '</code></pre>';
             break;
             case '--show-raw-data':
-                $tempHtml  .= '<pre><code>';
+                $tempHtml  .= '<pre><code id="devShowRawData">';
                 $tempHtml  .= var_export($this->rawdata(), true);
                 $tempHtml  .= '</code></pre>';
             break;
             case '--show-json':
-                $tempHtml  .= '<pre><code>';
+                $tempHtml  .= '<pre><code id="devShowJson">';
                 $tempHtml  .= $this->json();
                 $tempHtml  .= '</code></pre>';
             break;
@@ -669,7 +668,7 @@ class ChatBlock
             }
             $tempArray = array_values($tempArray);
             $tempArray = implode('<br/>',array_values($tempArray));
-            $tempHtml  = '<pre><code>'.nl2br($tempArray).'</code></pre>';
+            $tempHtml  = '<pre><code class="quoteCodeRange">'.nl2br($tempArray).'</code></pre>';
         }
         return $tempHtml;
     }
@@ -689,7 +688,7 @@ class ChatBlock
             $tempHtml .= '</form>';
         }
         $tempHtml .= '<div id="readingStory-changes-chatblock-'.$ts.'" class="margin-top-lg collapse">';
-            $tempHtml .= '<pre><code>'.($rawData).'</code>';
+            $tempHtml .= '<pre><code class="quoteCode">'.($rawData).'</code>';
             $tempHtml .= '<hr/>';
             $tempHtml .= $this->renderDev(null,'--info'); // debug 
             $tempHtml .= '<hr/>';
@@ -724,9 +723,13 @@ class ChatBlock
         $tempHtml .= '</div>';
         return $tempHtml;
     }
-    private function render_text($dialogue)
+    private function render_text($dialogue,$type)
     {
-        $sentence  = $this->fn_stripTags($dialogue['_context']);
+        if($type == 'p'){
+            $sentence  = $this->fn_stripTags($dialogue['_context']);
+        }elseif($type == 'sentence'){
+            $sentence  = $this->fn_stripTags($dialogue['_line']);
+        }
         $tempHtml  = '<div class="imessage">';
         $tempHtml .= '<p class="comment-full disable-select">'.$sentence.'</p>';
         $tempHtml .= '</div>';
@@ -735,7 +738,7 @@ class ChatBlock
     private function render_heading($dialogue)
     {
         $sentence  = $this->fn_stripTags($dialogue['_context']);
-        $tempHtml   = '<div class="imessage text-center">';
+        $tempHtml   = '<div class="imessage text-center disable-select">';
         $tempHtml  .= '<'.strtolower($dialogue['_castname']).'>';
         $tempHtml  .= $sentence;
         $tempHtml  .= '</'.strtolower($dialogue['_castname']).'>';
@@ -745,7 +748,7 @@ class ChatBlock
     private function md_render_heading($dialogue,$headingLevel)
     {
         $sentence  = $this->fn_stripTags($dialogue['_context']);
-        $tempHtml   = '<div class="imessage text-center">';
+        $tempHtml   = '<div class="imessage text-center disable-select">';
         $tempHtml  .= '<h'.$headingLevel.'>';
         $tempHtml  .= $sentence;
         $tempHtml  .= '</h'.$headingLevel.'>';
@@ -893,7 +896,7 @@ class ChatBlock
         if($this->currentCast !== $dialogue['_castname'])
         {
             $this->currentCast = $dialogue['_castname'];
-            $tempHtml .= '<div class="chat-name chat-name-'.$classDirection.'">';
+            $tempHtml .= '<div class="chat-name chat-name-'.$classDirection.' disable-select">';
             $chatHeaderImg = $this->loadChatHeaderImg($dialogue['_castname']);
             if($chatHeaderImg == false)
             {
