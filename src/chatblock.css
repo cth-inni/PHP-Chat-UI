@@ -20,9 +20,9 @@
   }
   
   .chatblock .imessage p {
-    border-radius: 1.15rem;
+    border-radius: 2rem;
     line-height: 2;
-    max-width: 75%;
+    max-width: 90%;
     padding: 0.5rem 0.75rem;
     position: relative;
     word-wrap: break-word;
@@ -49,6 +49,7 @@
     align-self: flex-end;
     background-color: #666;
     color: #fff; 
+    margin-right: 20px;
   }
 /* 
   .chatblock p.from-me {
@@ -87,7 +88,7 @@
   } */
   
   .chatblock p[class^="from-"] {
-    margin: 0.5rem 0;
+    /* margin: 0.5rem 0; */
     width: fit-content;
   }
   
@@ -106,8 +107,9 @@
   }
 
   .chatblock p.narrator {
-    background-color: #cccccc;
-    color: #000;
+    padding: 1.5em!important;
+    background-color: #FFF;
+    border: 1px dashed #ccc!important;
     max-width: 100%;
   }
 
@@ -115,6 +117,7 @@
     align-items: flex-start;
     background-color: #e5e5ea;
     color: #000;
+    margin-left: 20px;
   }
   
   /* .chatblock p.from-them:before {
@@ -260,6 +263,7 @@
   margin: 0px 4px;
 }
 
+.text-center,
 .chatblock .imessage .text-center,
 .chatblock .imessage h1,
 .chatblock .imessage h2,
