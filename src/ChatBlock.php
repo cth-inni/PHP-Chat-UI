@@ -311,7 +311,7 @@ class ChatBlock
         $linesArray = array_values(array_filter(explode(PHP_EOL,$rawData))); // string to array
         foreach($linesArray as $lineKey => $lineVal)
         {
-            if($lineVal != $this->SettingBreakPoint)
+            if(trim($lineVal) != $this->SettingBreakPoint)
             {
                 $tempLine = [];
                 $tempLine['_type']     = null;
@@ -441,7 +441,7 @@ class ChatBlock
         // }
         foreach($this->dialogue['lines'] as $dialogue)
         {
-            if($dialogue['_line'] != $this->SettingBreakPoint)
+            if(trim($dialogue['_line']) != $this->SettingBreakPoint)
             {
                 switch($dialogue['_castname'])
                 {
