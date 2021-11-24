@@ -88,17 +88,30 @@
   } */
   
   .chatblock p[class^="from-"] {
-    /* margin: 0.5rem 0; */
     width: fit-content;
+    box-shadow:none;
+    position:relative;
+  }
+  .chatblock p[class^="from-"]:after {
+    content:"";
+    display:block;
+    width:50%;
+    height:50%;
+    background: white;
+    position:absolute;
+    bottom:0px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:-1;
+    /* box-shadow: 0px 5px 80px 0px; */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, .16), 0 3px 6px rgba(0, 0, 0, .23);
   }
   
   .chatblock p.from-me ~ p.from-me {
-    /* margin: 0.25rem 0 0; */
     margin: 0;
   }
   
   .chatblock p.from-me ~ p.from-me:not(:last-child) {
-    /* margin: 0.25rem 0 0; */
     margin: 0;
   }
   
@@ -231,6 +244,7 @@
 .chatblock .imessage .chat-header-xl {
     border-radius: 1.5em;
     margin: .5em;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, .16), 0 3px 6px rgba(0, 0, 0, .23);
 }
 .chatblock .imessage .chat-header-s {
   width: 1.5em;
@@ -263,7 +277,6 @@
   margin: 0px 4px;
 }
 
-.text-center,
 .chatblock .imessage .text-center,
 .chatblock .imessage h1,
 .chatblock .imessage h2,
